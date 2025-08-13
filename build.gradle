@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '1.17.2'
+}
+
+group = 'com.plugin.drool'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+// Set compatibility versions
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+// Configure Gradle IntelliJ Plugin
+intellij {
+    version = '2024.1'
+    type = 'IC' // IntelliJ IDEA Community Edition
+    plugins = []
+}
+
+// Set the JVM compatibility versions
+tasks.withType(JavaCompile) {
+    options.release = 17
+}
+
+tasks {
+    patchPluginXml {
+        sinceBuild = '241'
+        untilBuild = '243.*'
+        changeNotes = """
+            <h3>1.0.0</h3>
+            <ul>
+                <li>Initial version of Drools syntax checker plugin</li>
+                <li>Basic syntax highlighting for .drl files</li>
+                <li>Support for Drools keywords, comments, strings, and numbers</li>
+                <li>Color customization support</li>
+            </ul>
+        """
+    }
+
+    signPlugin {
+        certificateChain = System.getenv("CERTIFICATE_CHAIN")
+        privateKey = System.getenv("PRIVATE_KEY")
+        password = System.getenv("PRIVATE_KEY_PASSWORD")
+    }
+
+    publishPlugin {
+        token = System.getenv("PUBLISH_TOKEN")
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+// Disable the OWASP plugin for now as it's not properly applied
+// apply plugin: "org.owasp.dependencycheck"

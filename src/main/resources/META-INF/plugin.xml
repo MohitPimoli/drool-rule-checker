@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>com.plugin.drool</id>
+    <name>Drools Rule Checker</name>
+    <version>1.0.1</version>
+    <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
+
+    <description>
+        A plugin to provide syntax highlighting and validation for Drools (.drl) files.
+    </description>
+
+    <!-- Minimum and maximum supported versions -->
+    <idea-version since-build="241.0" until-build="243.*"/>
+
+    <!-- Register the language first, then the file type -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Register the language -->
+        <lang.parserDefinition language="Drools"
+                               implementationClass="com.plugin.drool.DroolsParserDefinition"/>
+
+        <!-- Register the file type -->
+        <fileType name="Drools"
+                  language="Drools"
+                  extensions="drl"
+                  implementationClass="com.plugin.drool.DroolsFileType"/>
+
+        <!-- Syntax highlighter -->
+        <lang.syntaxHighlighterFactory language="Drools"
+                                       implementationClass="com.plugin.drool.DroolsSyntaxHighlighterFactory"/>
+
+        <!-- Color settings page for customization -->
+        <colorSettingsPage implementation="com.plugin.drool.DroolsColorSettingsPage"/>
+
+        <!-- INTELLIGENT FEATURES -->
+
+        <!-- Syntax error detection and validation -->
+        <annotator language="Drools"
+                   implementationClass="com.plugin.drool.DroolsAnnotator"/>
+
+        <!-- Auto-completion support -->
+        <completion.contributor language="Drools"
+                                implementationClass="com.plugin.drool.DroolsCompletionContributor"/>
+
+        <!-- Code folding support -->
+        <lang.foldingBuilder language="Drools"
+                             implementationClass="com.plugin.drool.DroolsFoldingBuilder"/>
+    </extensions>
+</idea-plugin>
