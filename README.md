@@ -114,5 +114,3 @@ Please include a short description and screenshots where relevant.
 MIT (see `LICENSE`).
 
 ---
-
-**Tip:** If your icon doesn’t show on the Marketplace/Installed tab, ensure `pluginIcon.svg` exists under `META-INF/` and rebuild with `./gradlew buildPlugin`.
