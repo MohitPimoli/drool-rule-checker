@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.plugin.drool</id>
     <name>Drools Rule Checker</name>
-    <version>1.0.1</version>
+    <version>1.0.7</version>
     <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
 
     <description>
@@ -9,7 +9,7 @@
     </description>
 
     <!-- Minimum and maximum supported versions -->
-    <idea-version since-build="241.0" until-build="243.*"/>
+    <idea-version since-build="250.0" until-build="253.*"/>
 
     <!-- Register the language first, then the file type -->
     <extensions defaultExtensionNs="com.intellij">

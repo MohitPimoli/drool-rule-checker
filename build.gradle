@@ -1,10 +1,10 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.17.2'
+    id 'org.jetbrains.intellij' version '1.17.3'
 }
 
 group = 'com.plugin.drool'
-version = '1.0.0'
+version = '1.0.7'
 
 repositories {
     mavenCentral()
@@ -12,6 +12,9 @@ repositories {
 
 // Set compatibility versions
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
@@ -23,22 +26,25 @@ dependencies {
 
 // Configure Gradle IntelliJ Plugin
 intellij {
-    version = '2024.1'
+    version = '2024.2.1'
     type = 'IC' // IntelliJ IDEA Community Edition
+    updateSinceUntilBuild = false
+    pluginName = 'drool-rule-checker'
     plugins = []
 }
 
 // Set the JVM compatibility versions
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.release = 17
 }
 
 tasks {
     patchPluginXml {
-        sinceBuild = '241'
-        untilBuild = '243.*'
+        sinceBuild = '250'
+        untilBuild = '253.*'
+        version = project.version
         changeNotes = """
-            <h3>1.0.0</h3>
+            <h3>1.0.7</h3>
             <ul>
                 <li>Initial version of Drools syntax checker plugin</li>
                 <li>Basic syntax highlighting for .drl files</li>
