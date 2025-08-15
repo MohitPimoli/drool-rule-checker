@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.plugin.drool'
-version = '1.0.9'
+version = '1.0.10'
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ tasks {
         untilBuild = '253.*'
         version = project.version
         changeNotes = """
-            <h3>1.0.9</h3>
+            <h3>1.0.10</h3>
             <ul>
                 <li>Initial version of Drools syntax checker plugin</li>
                 <li>Basic syntax highlighting for .drl files</li>

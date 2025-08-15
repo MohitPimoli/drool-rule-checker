@@ -30,16 +30,35 @@ public class Pattern {
           + "then\\s+"
           + "[\\s\\S]*?"
           + "\\bend\\b";
-  // Keep these for more granular validation
   public static final String RULE_NAME_REGEX = "rule\\s+(?:\"([^\"]*)\"|([\\w\\-_]+))";
   public static final String WHEN_THEN_BLOCK_REGEX = "when\\s+[\\s\\S]*?then";
   public static final String END_BLOCK_REGEX = "\\bend\\b";
   public static final String TYPO_REGEX = "\\b(wen|thn|edn|ruel)\\b";
-
-  // Additional patterns for individual components
   public static final String WHEN_CLAUSE_REGEX = "when\\s+[\\s\\S]*?(?=then)";
   public static final String THEN_CLAUSE_REGEX = "then\\s+[\\s\\S]*?(?=end)";
   public static final String RULE_ATTRIBUTES_REGEX =
       "(?:salience|no-loop|agenda-group|extends)\\s+[^\\n]*";
-
+  public static final String PUNCTUATION_REGEX = "[(){}\\[\\];,.:$]";
+  public static final String JAVA_STATEMENT_REGEX = "[^;{}]*;";
+  public static final String FIELD_ACCESS_REGEX =
+      "\\$[a-zA-Z_][a-zA-Z0-9_]*\\.[a-zA-Z_][a-zA-Z0-9_]*";
+  public static final String FUNCTION_CALL_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*\\s*\\([^)]*\\)";
+  // More specific constraint expression pattern for Drools (not Java assignments)
+  public static final String CONSTRAINT_EXPRESSION_REGEX =
+      "\\$?[a-zA-Z_][a-zA-Z0-9_]*\\s*[><=!]\\s*[^,);]+";
+  // More conservative patterns to reduce false positives
+  public static final String UNCLOSED_STRING_REGEX =
+      "\"[^\"\\n]{10,}\\s*$"; // Only long unclosed strings
+  public static final String INVALID_ESCAPE_REGEX = "\\\\[^\"\\\\nrtbf]";
+  public static final String UNMATCHED_OPEN_PAREN = "\\([^)]{15,}$"; // Only longer unmatched
+  public static final String UNMATCHED_CLOSE_PAREN = "^[^(]{15,}\\)";
+  public static final String UNMATCHED_OPEN_BRACE = "\\{[^}]{15,}$";
+  public static final String UNMATCHED_CLOSE_BRACE = "^[^{]{15,}\\}";
+  public static final String UNMATCHED_OPEN_BRACKET = "\\[[^\\]]{15,}$";
+  public static final String UNMATCHED_CLOSE_BRACKET = "^[^\\[]{15,}\\]";
+  public static final String JAVA_CODE_BLOCK = "then\\s+([\\s\\S]*?)(?=\\s*end)";
+  public static final String MISSING_SEMICOLON =
+      "[a-zA-Z_$][a-zA-Z0-9_]*\\s*\\([^)]*\\)\\s*\\n\\s*[a-zA-Z_$]"; // More specific
+  public static final String INCOMPLETE_STATEMENT =
+      "(if|for|while)\\s*\\([^)]*\\)\\s*(?!\\{)[^;\\n]{5,}$"; // More specific
 }

@@ -136,7 +136,68 @@ public class DroolsLexer extends LexerBase {
       return;
     }
 
-    // Single character token
+    // Check for specific punctuation characters
+    char currentChar = text.charAt(0);
+    switch (currentChar) {
+      case '(':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.LEFT_PAREN;
+        currentOffset = currentTokenEnd;
+        return;
+      case ')':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.RIGHT_PAREN;
+        currentOffset = currentTokenEnd;
+        return;
+      case '{':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.LEFT_BRACE;
+        currentOffset = currentTokenEnd;
+        return;
+      case '}':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.RIGHT_BRACE;
+        currentOffset = currentTokenEnd;
+        return;
+      case '[':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.LEFT_BRACKET;
+        currentOffset = currentTokenEnd;
+        return;
+      case ']':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.RIGHT_BRACKET;
+        currentOffset = currentTokenEnd;
+        return;
+      case ';':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.SEMICOLON;
+        currentOffset = currentTokenEnd;
+        return;
+      case ',':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.COMMA;
+        currentOffset = currentTokenEnd;
+        return;
+      case '.':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.DOT;
+        currentOffset = currentTokenEnd;
+        return;
+      case ':':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.COLON;
+        currentOffset = currentTokenEnd;
+        return;
+      case '$':
+        currentTokenEnd = currentOffset + 1;
+        currentTokenType = DroolsTokenTypes.DOLLAR;
+        currentOffset = currentTokenEnd;
+        return;
+      default:
+    }
+
+    // Single character token (unrecognized)
     currentTokenEnd = currentOffset + 1;
     currentTokenType = DroolsTokenTypes.BAD_CHARACTER;
     currentOffset = currentTokenEnd;

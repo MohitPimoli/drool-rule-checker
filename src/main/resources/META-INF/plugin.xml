@@ -1,15 +1,118 @@
 <idea-plugin>
     <id>com.plugin.drool</id>
     <name>Drools Rule Checker</name>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
     <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
 
-    <description>
-        A plugin to provide syntax highlighting and validation for Drools (.drl) files.
-    </description>
+    <description><![CDATA[
+        <h2>🔥 Drools Rule Checker - Professional IDE Support for Drools Rules</h2>
+        
+        <p>Transform your Drools development experience with comprehensive IDE support for <code>.drl</code> files. 
+        Get the same level of intelligent assistance you expect from modern IDEs - syntax highlighting, 
+        real-time validation, auto-completion, and error detection.</p>
+
+        <h3>✨ Key Features</h3>
+        <ul>
+            <li><strong>🎨 Advanced Syntax Highlighting</strong> - Beautiful color coding for keywords, strings, numbers, comments, operators, and punctuation</li>
+            <li><strong>🔍 Real-time Validation</strong> - Instant error detection as you type, just like in Java or other languages</li>
+            <li><strong>🚨 Comprehensive Error Detection</strong>:
+                <ul>
+                    <li>Missing brackets, parentheses, and braces</li>
+                    <li>Unclosed quotes and invalid escape sequences</li>
+                    <li>Missing semicolons in Java code blocks</li>
+                    <li>Invalid rule structure (rule → when → then → end)</li>
+                    <li>Common typos (wen → when, thn → then)</li>
+                    <li>Malformed constraint expressions</li>
+                </ul>
+            </li>
+            <li><strong>💡 Smart Auto-completion</strong> - Context-aware suggestions for keywords, functions, and rule templates</li>
+            <li><strong>📁 Code Folding</strong> - Collapse rule blocks and comments for better navigation</li>
+            <li><strong>🎯 Field Access Validation</strong> - Validates $variable.field patterns</li>
+            <li><strong>⚡ Performance Hints</strong> - Suggests optimizations (e.g., avoid eval() when possible)</li>
+            <li><strong>🎨 Customizable Colors</strong> - Personalize syntax highlighting in IDE settings</li>
+        </ul>
+
+        <h3>🚀 Perfect For</h3>
+        <ul>
+            <li>Business Rules Developers</li>
+            <li>Java Developers working with Drools</li>
+            <li>Decision Management Teams</li>
+            <li>Anyone writing .drl files</li>
+        </ul>
+
+        <h3>📋 Supported Drools Features</h3>
+        <ul>
+            <li>Rule definitions with attributes (salience, no-loop, etc.)</li>
+            <li>When-Then-End clause validation</li>
+            <li>Java code blocks in 'then' clauses</li>
+            <li>Field constraints and expressions</li>
+            <li>Function calls and built-in operators</li>
+            <li>Comments (single-line and multi-line)</li>
+        </ul>
+
+        <h3>🔧 Installation</h3>
+        <ol>
+            <li>Go to <code>File → Settings → Plugins</code></li>
+            <li>Search for "Drools Rule Checker"</li>
+            <li>Click Install and restart IntelliJ IDEA</li>
+            <li>Open any <code>.drl</code> file and enjoy enhanced editing!</li>
+        </ol>
+
+        <h3>💻 Example Rule with Validation</h3>
+        <pre><code>rule "Customer Discount"
+    salience 100
+    when
+        $customer : Customer(age > 18, status == "ACTIVE")
+        $order : Order(total > 1000.00) from $customer.orders
+    then
+        $order.setDiscount(0.15);
+        update($order);
+        System.out.println("Discount applied!");
+end</code></pre>
+
+        <p>The plugin will validate syntax, highlight errors, and provide intelligent suggestions as you type.</p>
+
+        <h3>🐛 Bug Reports & Feature Requests</h3>
+        <p>Found an issue or have a suggestion? Please report it on our 
+        <a href="https://github.com/MohitPimoli/drool-rule-checker/issues">GitHub Issues</a> page.</p>
+
+        <h3>⭐ Support the Project</h3>
+        <p>If this plugin helps your development workflow, please consider:</p>
+        <ul>
+            <li>⭐ Starring the project on <a href="https://github.com/MohitPimoli/drool-rule-checker">GitHub</a></li>
+            <li>📝 Writing a review on the JetBrains Marketplace</li>
+            <li>🐛 Reporting bugs or suggesting features</li>
+        </ul>
+
+        <p><em>Made with ❤️ for the Drools community</em></p>
+    ]]></description>
 
     <!-- Minimum and maximum supported versions -->
     <idea-version since-build="250.0" until-build="253.*"/>
+
+    <change-notes><![CDATA[
+        <h3>Version 1.0.10 - Enhanced Syntax Validation</h3>
+        <ul>
+            <li><strong>🆕 Advanced Bracket Matching</strong> - Real-time validation of parentheses, braces, and brackets</li>
+            <li><strong>🆕 Java Code Block Validation</strong> - Missing semicolon detection in 'then' clauses</li>
+            <li><strong>🆕 Enhanced String Validation</strong> - Unclosed quotes and invalid escape sequence detection</li>
+            <li><strong>🆕 Field Access Validation</strong> - Validates $variable.field patterns</li>
+            <li><strong>🆕 Function Call Validation</strong> - Ensures proper function call syntax</li>
+            <li><strong>🆕 Constraint Expression Validation</strong> - Validates comparison operators and expressions</li>
+            <li><strong>🎨 Enhanced Syntax Highlighting</strong> - Better color coding for punctuation and brackets</li>
+            <li><strong>⚡ Performance Improvements</strong> - Faster real-time validation</li>
+        </ul>
+
+        <h3>Version 1.0.9 - Foundation Release</h3>
+        <ul>
+            <li>✅ Basic syntax highlighting for .drl files</li>
+            <li>✅ Rule structure validation (rule → when → then → end)</li>
+            <li>✅ Common typo detection</li>
+            <li>✅ Auto-completion for keywords and functions</li>
+            <li>✅ Code folding support</li>
+            <li>✅ Customizable color settings</li>
+        </ul>
+    ]]></change-notes>
 
     <!-- Register the language first, then the file type -->
     <extensions defaultExtensionNs="com.intellij">

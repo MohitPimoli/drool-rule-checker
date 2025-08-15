@@ -21,6 +21,8 @@ public class DroolsColorSettingsPage implements ColorSettingsPage {
         new AttributesDescriptor("Number", DroolsSyntaxHighlighter.NUMBER),
         new AttributesDescriptor("Comment", DroolsSyntaxHighlighter.COMMENT),
         new AttributesDescriptor("Operator", DroolsSyntaxHighlighter.OPERATOR),
+        new AttributesDescriptor("Punctuation", DroolsSyntaxHighlighter.PUNCTUATION),
+        new AttributesDescriptor("Brackets", DroolsSyntaxHighlighter.BRACKETS),
       };
 
   @Nullable
