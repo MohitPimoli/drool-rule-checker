@@ -45,11 +45,26 @@ public class DroolsFoldingBuilder extends FoldingBuilderEx {
 
       if (end - start > 20) { // Only fold if the rule is reasonably long
         TextRange range = TextRange.create(start, end);
+
+        // Capture the rule name here, while the matcher state is valid
+        String ruleName = "unknown";
+        try {
+          if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+            ruleName = matcher.group(1);
+          }
+        } catch (IllegalStateException e) {
+          // If group extraction fails, use default name
+          ruleName = "rule";
+        }
+
+        // Create a final variable for use in lambda
+        final String finalRuleName = ruleName;
+
         descriptors.add(
             new FoldingDescriptor(root.getNode(), range) {
               @Override
               public String getPlaceholderText() {
-                return "rule \"" + matcher.group(1) + "\" { ... }";
+                return "rule \"" + finalRuleName + "\" { ... }";
               }
             });
       }
@@ -85,15 +100,31 @@ public class DroolsFoldingBuilder extends FoldingBuilderEx {
     while (matcher.find()) {
       int start = matcher.start();
       int end = matcher.end();
-      long lineCount = matcher.group(1).chars().filter(ch -> ch == '\n').count() + 1;
+
+      // Safely extract the matched group
+      String matchedGroup = "";
+      try {
+        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
+          matchedGroup = matcher.group(1);
+        }
+      } catch (IllegalStateException e) {
+        // If group extraction fails, use the entire match
+        matchedGroup = matcher.group(0);
+      }
+
+      long lineCount = matchedGroup.chars().filter(ch -> ch == '\n').count() + 1;
 
       if (lineCount > 3) { // Fold if more than 3 consecutive comment lines
         TextRange range = TextRange.create(start, end);
+
+        // Capture line count for lambda
+        final long finalLineCount = lineCount;
+
         descriptors.add(
             new FoldingDescriptor(root.getNode(), range) {
               @Override
               public String getPlaceholderText() {
-                return "// ... (" + lineCount + " lines)";
+                return "// ... (" + finalLineCount + " lines)";
               }
             });
       }
