@@ -1,7 +1,7 @@
 # 🔥 Drools Rule Checker
 
 [![JetBrains Plugin](https://img.shields.io/badge/JetBrains-Plugin-orange.svg)](https://plugins.jetbrains.com/plugin/your-plugin-id)
-[![Version](https://img.shields.io/badge/version-1.0.9-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
+[![Version](https://img.shields.io/badge/version-1.0.10-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Downloads](https://img.shields.io/badge/downloads-1K+-brightgreen.svg)](https://plugins.jetbrains.com/plugin/your-plugin-id)
 
