@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.plugin.drool</id>
     <name>Drools Rule Checker</name>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
 
     <description><![CDATA[
@@ -23,6 +23,8 @@
                     <li>Invalid rule structure (rule → when → then → end)</li>
                     <li>Common typos (wen → when, thn → then)</li>
                     <li>Malformed constraint expressions</li>
+                    <li><strong>🆕 Missing import statements for unresolved classes</strong></li>
+                    <li><strong>🆕 Invalid import statement syntax</strong></li>
                 </ul>
             </li>
             <li><strong>💡 Smart Auto-completion</strong> - Context-aware suggestions for keywords, functions, and rule templates</li>
@@ -90,7 +92,21 @@ end</code></pre>
     <!-- Minimum and maximum supported versions -->
     <idea-version since-build="250.0" until-build="253.*"/>
 
+    <!-- Plugin dependencies -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
     <change-notes><![CDATA[
+        <h3>Version 1.0.11 - Import Validation & Missing Dependencies</h3>
+        <ul>
+            <li><strong>🆕 Import Statement Validation</strong> - Real-time validation of import statements syntax</li>
+            <li><strong>🆕 Missing Import Detection</strong> - Detects and highlights unresolved class references</li>
+            <li><strong>🆕 Smart Class Resolution</strong> - Automatically recognizes java.lang classes (no import needed)</li>
+            <li><strong>🆕 Import Syntax Checking</strong> - Validates import path format and missing semicolons</li>
+            <li><strong>🔍 Enhanced Error Messages</strong> - Clear "Cannot resolve symbol" messages like in Java IDEs</li>
+            <li><strong>⚡ Intelligent Filtering</strong> - Excludes Drools keywords and common words from class validation</li>
+        </ul>
+
         <h3>Version 1.0.10 - Enhanced Syntax Validation</h3>
         <ul>
             <li><strong>🆕 Advanced Bracket Matching</strong> - Real-time validation of parentheses, braces, and brackets</li>

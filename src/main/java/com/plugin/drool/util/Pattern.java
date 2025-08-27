@@ -61,4 +61,15 @@ public class Pattern {
       "[a-zA-Z_$][a-zA-Z0-9_]*\\s*\\([^)]*\\)\\s*\\n\\s*[a-zA-Z_$]"; // More specific
   public static final String INCOMPLETE_STATEMENT =
       "(if|for|while)\\s*\\([^)]*\\)\\s*(?!\\{)[^;\\n]{5,}$"; // More specific
+
+  // Import validation patterns
+  public static final String IMPORT_STATEMENT_REGEX =
+      "import\\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*(?:\\.\\*)?);?";
+  public static final String PACKAGE_STATEMENT_REGEX =
+      "package\\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*);?";
+  public static final String CLASS_USAGE_REGEX = "\\b([A-Z][a-zA-Z0-9_]*)\\b";
+  public static final String TYPE_REGEX = "\\b([A-Z][a-zA-Z0-9_]*)\\s*\\(";
+  public static final String STATIC_CALL_REGEX =
+      "\\b([A-Z][a-zA-Z0-9_]*)\\.[a-zA-Z_][a-zA-Z0-9_]*\\s*\\(";
+  public static final String NEW_CLASS_NAME_REGEX = "\\bnew\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\(";
 }

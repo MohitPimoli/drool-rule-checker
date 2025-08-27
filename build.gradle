@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.plugin.drool'
-version = '1.0.10'
+version = '1.0.11'
 
 repositories {
     mavenCentral()
@@ -30,7 +30,7 @@ intellij {
     type = 'IC' // IntelliJ IDEA Community Edition
     updateSinceUntilBuild = false
     pluginName = 'drool-rule-checker'
-    plugins = []
+    plugins = ['java']
 }
 
 // Set the JVM compatibility versions
@@ -44,7 +44,7 @@ tasks {
         untilBuild = '253.*'
         version = project.version
         changeNotes = """
-            <h3>1.0.10</h3>
+            <h3>1.0.11</h3>
             <ul>
                 <li>Initial version of Drools syntax checker plugin</li>
                 <li>Basic syntax highlighting for .drl files</li>

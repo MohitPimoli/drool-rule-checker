@@ -1,28 +1,41 @@
 package com.plugin.drool;
 
+import com.intellij.lang.annotation.AnnotationHolder;
+import com.intellij.lang.annotation.Annotator;
+import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
+
+import static com.plugin.drool.util.DroolsConstants.IMPORT;
 import static com.plugin.drool.util.DroolsConstants.RULE_SPACE;
-import static com.plugin.drool.util.Pattern.CONSTRAINT_EXPRESSION_REGEX;
+import static com.plugin.drool.util.DroolsConstants.isJavaLangClass;
+import static com.plugin.drool.util.DroolsConstants.shouldSkipImportValidation;
 import static com.plugin.drool.util.Pattern.FIELD_ACCESS_REGEX;
 import static com.plugin.drool.util.Pattern.FUNCTION_CALL_REGEX;
+import static com.plugin.drool.util.Pattern.IMPORT_STATEMENT_REGEX;
 import static com.plugin.drool.util.Pattern.INCOMPLETE_STATEMENT;
 import static com.plugin.drool.util.Pattern.INVALID_ESCAPE_REGEX;
 import static com.plugin.drool.util.Pattern.JAVA_CODE_BLOCK;
 import static com.plugin.drool.util.Pattern.MISSING_SEMICOLON;
+import static com.plugin.drool.util.Pattern.NEW_CLASS_NAME_REGEX;
 import static com.plugin.drool.util.Pattern.RULE_ATTRIBUTES_REGEX;
 import static com.plugin.drool.util.Pattern.RULE_NAME_REGEX;
+import static com.plugin.drool.util.Pattern.STATIC_CALL_REGEX;
+import static com.plugin.drool.util.Pattern.TYPE_REGEX;
 import static com.plugin.drool.util.Pattern.TYPO_REGEX;
 import static com.plugin.drool.util.Pattern.UNCLOSED_STRING_REGEX;
-
-import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
-import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.jetbrains.annotations.NotNull;
 
 public class DroolsAnnotator implements Annotator {
   private static final Pattern RULE_NAME_PATTERN = Pattern.compile(RULE_NAME_REGEX);
@@ -62,11 +75,14 @@ public class DroolsAnnotator implements Annotator {
           validateJavaCodeBlocks(element, holder, text);
         }
 
-        // Temporarily disabled to avoid false positives with Java assignments
-        // validateConstraintExpressions(element, holder, text);
         validateFieldAccess(element, holder, text);
         validateStringLiterals(element, holder, text);
         validateFunctionCalls(element, holder, text);
+      }
+
+      // Import validation - only for files with explicit import statements
+      if (text.contains(IMPORT) && text.length() > 100) {
+        validateImports(element, holder, text);
       }
     }
   }
@@ -429,63 +445,6 @@ public class DroolsAnnotator implements Annotator {
     }
   }
 
-  /**
-   * Validates constraint expressions in when clauses - only in Drools constraints, not Java code
-   */
-  private void validateConstraintExpressions(
-      PsiElement element, AnnotationHolder holder, String text) {
-
-    // Only validate constraint expressions in 'when' clauses, not in 'then' clauses (Java code)
-    if (!text.contains("when") || text.contains("then")) {
-      return;
-    }
-
-    // Extract only the 'when' clause part
-    int whenIndex = text.indexOf("when");
-    int thenIndex = text.indexOf("then");
-    if (whenIndex == -1) return;
-
-    String whenClause;
-    if (thenIndex != -1 && thenIndex > whenIndex) {
-      whenClause = text.substring(whenIndex, thenIndex);
-    } else {
-      whenClause = text.substring(whenIndex);
-    }
-
-    Pattern constraintPattern = Pattern.compile(CONSTRAINT_EXPRESSION_REGEX);
-    Matcher matcher = constraintPattern.matcher(whenClause);
-
-    while (matcher.find()) {
-      String constraint = matcher.group(0);
-
-      // Check for invalid operators - only in Drools constraint context
-      // Skip if it looks like a Java assignment (has semicolon or is in parentheses for method
-      // calls)
-      if (constraint.contains("=")
-          && !constraint.contains("==")
-          && !constraint.contains("!=")
-          && !constraint.contains("<=")
-          && !constraint.contains(">=")
-          && !constraint.contains(";") // Skip Java statements
-          && !isInMethodCall(constraint)) { // Skip method parameters
-
-        int start = element.getTextOffset() + whenIndex + matcher.start();
-        int end = element.getTextOffset() + whenIndex + matcher.end();
-
-        holder
-            .newAnnotation(HighlightSeverity.ERROR, "Use '==' for comparison, not '='")
-            .range(TextRange.create(start, end))
-            .create();
-      }
-    }
-  }
-
-  private boolean isInMethodCall(String constraint) {
-    // Check if this constraint is inside a method call (has parentheses around it)
-    return constraint.trim().startsWith("(")
-        || constraint.contains("(") && constraint.contains(")");
-  }
-
   /** Validates field access patterns ($variable.field) */
   private void validateFieldAccess(PsiElement element, AnnotationHolder holder, String text) {
     Pattern fieldAccessPattern = Pattern.compile(FIELD_ACCESS_REGEX);
@@ -579,6 +538,289 @@ public class DroolsAnnotator implements Annotator {
             .range(TextRange.create(start, end))
             .create();
       }
+    }
+  }
+
+  /** Validates import statements and checks for missing imports for used classes */
+  private void validateImports(PsiElement element, AnnotationHolder holder, String text) {
+    // Skip validation for short text blocks or if no substantial content
+    if (text.length() < 50) {
+      return;
+    }
+
+    // Only validate if this looks like a complete file or substantial block
+    boolean hasPackageOrImport = text.contains("package ") || text.contains(IMPORT);
+    boolean hasRule = text.contains("rule ");
+
+    // Only validate imports if we have a substantial Drools file
+    if (!hasPackageOrImport && !hasRule) {
+      return;
+    }
+
+    // Validate import syntax
+    validateImportSyntax(element, holder, text);
+
+    // Enable missing import detection with improved logic
+    Set<String> importedClasses = extractImportedClasses(text);
+    Set<String> usedClasses = extractUsedClasses(text);
+    checkMissingImports(element, holder, text, importedClasses, usedClasses);
+
+    // Validate that imported classes can be resolved
+    validateImportResolution(element, holder, text);
+  }
+
+  /** Extracts all imported classes from import statements */
+  private Set<String> extractImportedClasses(String text) {
+    Set<String> importedClasses = new HashSet<>();
+
+    Pattern importPattern = Pattern.compile(IMPORT_STATEMENT_REGEX);
+    Matcher matcher = importPattern.matcher(text);
+
+    while (matcher.find()) {
+      String importPath = matcher.group(1);
+
+      if (!importPath.endsWith(".*")) {
+        // Extract class name from full path (e.g., java.util.List -> List)
+        String className = importPath.substring(importPath.lastIndexOf('.') + 1);
+        importedClasses.add(className);
+      }
+      // Wildcard import - we'll be lenient and assume all classes are available
+      // In a real implementation, you'd want to resolve the package contents
+    }
+    return importedClasses;
+  }
+
+  /** Extracts all used class names from the file content (more conservative) */
+  private Set<String> extractUsedClasses(String text) {
+    Set<String> usedClasses = new HashSet<>();
+
+    // 1. Look for "new ClassName(" patterns - most reliable
+    Pattern newClassPattern = Pattern.compile(NEW_CLASS_NAME_REGEX);
+    Matcher matcher = newClassPattern.matcher(text);
+
+    while (matcher.find()) {
+      String className = matcher.group(1);
+      if (!shouldSkipImportValidation(className)) {
+        usedClasses.add(className);
+      }
+    }
+
+    // 2. Look for static method calls - ClassName.methodName()
+    Pattern staticCallPattern = Pattern.compile(STATIC_CALL_REGEX);
+    matcher = staticCallPattern.matcher(text);
+
+    while (matcher.find()) {
+      String className = matcher.group(1);
+      if (!shouldSkipImportValidation(className) && !text.contains("$" + className)) {
+        usedClasses.add(className);
+      }
+    }
+
+    // 3. Look for type declarations in Drools - ClassName(field == value)
+    Pattern typeConstraintPattern = Pattern.compile(TYPE_REGEX);
+    matcher = typeConstraintPattern.matcher(text);
+
+    while (matcher.find()) {
+      String className = matcher.group(1);
+      // Only add if it's in a 'when' clause and not a method call
+      int position = matcher.start();
+      String beforeClass = text.substring(Math.max(0, position - 20), position);
+
+      // Check if it's likely a Drools type constraint (not a method call)
+      if (!beforeClass.contains("new ")
+          && !beforeClass.contains(".")
+          && !shouldSkipImportValidation(className)) {
+        usedClasses.add(className);
+      }
+    }
+
+    return usedClasses;
+  }
+
+  /** Checks for missing imports and creates error annotations */
+  private void checkMissingImports(
+      PsiElement element,
+      AnnotationHolder holder,
+      String text,
+      Set<String> importedClasses,
+      Set<String> usedClasses) {
+
+    for (String usedClass : usedClasses) {
+      if (!importedClasses.contains(usedClass) && !isJavaLangClass(usedClass)) {
+        // Find all occurrences of this class in the text
+        Pattern classOccurrencePattern = Pattern.compile("\\b" + Pattern.quote(usedClass) + "\\b");
+        Matcher matcher = classOccurrencePattern.matcher(text);
+
+        while (matcher.find()) {
+          // Skip if it's in an import statement or package declaration
+          if (isInImportOrPackage(text, matcher.start())) {
+            continue;
+          }
+
+          int start = element.getTextOffset() + matcher.start();
+          int end = element.getTextOffset() + matcher.end();
+
+          holder
+              .newAnnotation(
+                  HighlightSeverity.ERROR,
+                  "Cannot resolve symbol '" + usedClass + "'. Add import statement.")
+              .range(TextRange.create(start, end))
+              .create();
+        }
+      }
+    }
+  }
+
+  /** Validates import statement syntax (more conservative) */
+  private void validateImportSyntax(PsiElement element, AnnotationHolder holder, String text) {
+    // Only validate explicit import lines to avoid false positives
+    String[] lines = text.split("\n");
+
+    for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      String line = lines[lineIndex].trim();
+
+      // Only validate lines that clearly start with "import"
+      if (line.startsWith(IMPORT)) {
+        // Check for missing semicolon at end of import line
+        if (!line.endsWith(";")) {
+          // Find the position in the original text
+          int lineStart = 0;
+          for (int i = 0; i < lineIndex; i++) {
+            lineStart += lines[i].length() + 1; // +1 for newline
+          }
+
+          int start = element.getTextOffset() + lineStart + line.length();
+          int end = start + 1;
+
+          holder
+              .newAnnotation(HighlightSeverity.WARNING, "Missing semicolon in import statement")
+              .range(TextRange.create(start, end))
+              .create();
+        }
+
+        // Validate import path format (basic validation)
+        String importPath = line.substring(6).trim(); // Remove IMPORT
+        if (importPath.endsWith(";")) {
+          importPath = importPath.substring(0, importPath.length() - 1);
+        }
+
+        // Very basic validation - just check it's not empty and has valid characters
+        if (importPath.isEmpty() || !importPath.matches("[a-zA-Z_][a-zA-Z0-9_.*]*")) {
+          int lineStart = 0;
+          for (int i = 0; i < lineIndex; i++) {
+            lineStart += lines[i].length() + 1;
+          }
+
+          int start = element.getTextOffset() + lineStart;
+          int end = element.getTextOffset() + lineStart + line.length();
+
+          holder
+              .newAnnotation(HighlightSeverity.ERROR, "Invalid import statement format")
+              .range(TextRange.create(start, end))
+              .create();
+        }
+      }
+    }
+  }
+
+  /** Checks if a position is within an import or package statement */
+  private boolean isInImportOrPackage(String text, int position) {
+    // Find the line containing this position
+    int lineStart = text.lastIndexOf('\n', position) + 1;
+    int lineEnd = text.indexOf('\n', position);
+    if (lineEnd == -1) lineEnd = text.length();
+
+    String line = text.substring(lineStart, lineEnd).trim();
+    return line.startsWith(IMPORT) || line.startsWith("package ");
+  }
+
+  /** Validates that imported classes can actually be resolved (exist in classpath) */
+  private void validateImportResolution(PsiElement element, AnnotationHolder holder, String text) {
+    String[] lines = text.split("\n");
+
+    for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      String line = lines[lineIndex].trim();
+
+      if (line.startsWith(IMPORT) && !line.contains(".*")) {
+        // Extract the full class path
+        String importPath = line.substring(6).trim();
+        if (importPath.endsWith(";")) {
+          importPath = importPath.substring(0, importPath.length() - 1);
+        }
+
+        // Try to resolve the class using IntelliJ's PSI system
+        if (!canResolveClass(element, importPath)) {
+          // Find the position in the original text
+          int lineStart = 0;
+          for (int i = 0; i < lineIndex; i++) {
+            lineStart += lines[i].length() + 1; // +1 for newline
+          }
+
+          // Highlight the class path part of the import
+          int importStart = line.indexOf(importPath);
+          int start = element.getTextOffset() + lineStart + importStart;
+          int end = start + importPath.length();
+
+          holder
+              .newAnnotation(HighlightSeverity.ERROR, "Cannot resolve class '" + importPath + "'")
+              .range(TextRange.create(start, end))
+              .create();
+        }
+      }
+    }
+  }
+
+  /**
+   * Attempts to resolve a class using IntelliJ's PSI system This includes ALL dependencies: Maven,
+   * Gradle, local repos, JARs, etc.
+   */
+  private boolean canResolveClass(PsiElement element, String fullyQualifiedClassName) {
+    try {
+      // Use IntelliJ's JavaPsiFacade to resolve classes
+      JavaPsiFacade facade = JavaPsiFacade.getInstance(element.getProject());
+
+      // Try multiple search scopes for comprehensive dependency resolution
+
+      // 1. All scope - includes everything (dependencies, JARs, etc.)
+      PsiClass psiClass =
+          facade.findClass(
+              fullyQualifiedClassName, GlobalSearchScope.allScope(element.getProject()));
+      if (psiClass != null) {
+        return true;
+      }
+
+      // 2. Libraries and dependencies scope - for Maven/Gradle dependencies
+      Module module = ModuleUtilCore.findModuleForPsiElement(element);
+      if (module != null) {
+        // Module with dependencies and libraries scope
+        psiClass =
+            facade.findClass(
+                fullyQualifiedClassName,
+                GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
+        if (psiClass != null) {
+          return true;
+        }
+
+        // Libraries scope only (external dependencies)
+        psiClass =
+            facade.findClass(
+                fullyQualifiedClassName, GlobalSearchScope.moduleWithLibrariesScope(module));
+        if (psiClass != null) {
+          return true;
+        }
+
+        // Project scope (for classes within the project)
+        psiClass =
+            facade.findClass(
+                fullyQualifiedClassName, GlobalSearchScope.projectScope(element.getProject()));
+        return psiClass != null;
+      }
+
+      return false;
+    } catch (Exception e) {
+      // If we can't resolve for any reason, assume it's valid to avoid false positives
+      // This handles edge cases where PSI might not be fully initialized
+      return true;
     }
   }
 }
