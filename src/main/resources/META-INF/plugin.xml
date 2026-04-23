@@ -90,7 +90,7 @@ end</code></pre>
     ]]></description>
 
     <!-- Minimum and maximum supported versions -->
-    <idea-version since-build="250.0" until-build="253.*"/>
+    <idea-version since-build="250.0"/>
 
     <!-- Plugin dependencies -->
     <depends>com.intellij.modules.platform</depends>

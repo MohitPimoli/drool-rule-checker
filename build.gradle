@@ -41,7 +41,6 @@ tasks.withType(JavaCompile).configureEach {
 tasks {
     patchPluginXml {
         sinceBuild = '250'
-        untilBuild = '253.*'
         version = project.version
         changeNotes = """
             <h3>1.0.11</h3>
