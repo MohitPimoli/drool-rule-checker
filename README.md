@@ -9,7 +9,7 @@
 
 Transform your Drools development experience with comprehensive IDE features including syntax highlighting, real-time validation, auto-completion, and intelligent error detection - just like you'd expect from modern Java development.
 
-![Plugin Demo](docs/images/demo.gif)
+<!-- ![Plugin Demo](docs/images/demo.gif) -->
 
 ## ✨ Features
 
@@ -204,7 +204,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ for the Drools community**
 
 [⭐ Star on GitHub](https://github.com/MohitPimoli/drool-rule-checker) • 
-[📥 Download Plugin](https://plugins.jetbrains.com/plugin/your-plugin-id) • 
+<!-- [📥 Download Plugin](https://plugins.jetbrains.com/plugin/your-plugin-id) • -->
 [🐛 Report Issues](https://github.com/MohitPimoli/drool-rule-checker/issues)
 
 </div>
