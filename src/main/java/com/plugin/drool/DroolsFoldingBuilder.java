@@ -1,22 +1,25 @@
 package com.plugin.drool;
 
-import static com.plugin.drool.util.Pattern.COMMENT_BLOCK;
-import static com.plugin.drool.util.Pattern.RULE_BLOCK;
-import static com.plugin.drool.util.Pattern.SINGLE_LINE_COMMENT;
-
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.folding.FoldingBuilderEx;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.plugin.drool.psi.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static com.plugin.drool.util.DroolsConstants.UNNAMED;
+
+/**
+ * PSI-based folding builder for Drools DRL files. Traverses the PSI tree to find foldable
+ * constructs instead of using regex matching.
+ */
 public class DroolsFoldingBuilder extends FoldingBuilderEx {
 
   @NotNull
@@ -24,121 +27,228 @@ public class DroolsFoldingBuilder extends FoldingBuilderEx {
   public FoldingDescriptor @NotNull [] buildFoldRegions(
       @NotNull PsiElement root, @NotNull Document document, boolean quick) {
     List<FoldingDescriptor> descriptors = new ArrayList<>();
-    String text = document.getText();
 
-    // Find rule blocks
-    findRuleBlocks(descriptors, root, text);
+    // Fold rule blocks
+    for (DroolsRuleBlock ruleBlock : PsiTreeUtil.findChildrenOfType(root, DroolsRuleBlock.class)) {
+      addRuleBlockFolding(descriptors, ruleBlock);
+    }
 
-    // Find comment blocks
-    findCommentBlocks(descriptors, root, text);
+    // Fold consecutive import statement groups
+    addImportGroupFolding(descriptors, root);
+
+    // Fold declare blocks
+    for (DroolsDeclareBlock declareBlock :
+        PsiTreeUtil.findChildrenOfType(root, DroolsDeclareBlock.class)) {
+      addDeclareBlockFolding(descriptors, declareBlock);
+    }
+
+    // Fold query definitions
+    for (DroolsQueryDef queryDef : PsiTreeUtil.findChildrenOfType(root, DroolsQueryDef.class)) {
+      addQueryDefFolding(descriptors, queryDef);
+    }
+
+    // Fold function definitions
+    for (DroolsFunctionDef functionDef :
+        PsiTreeUtil.findChildrenOfType(root, DroolsFunctionDef.class)) {
+      addFunctionDefFolding(descriptors, functionDef);
+    }
+
+    // Fold multi-line comments
+    for (PsiComment comment : PsiTreeUtil.findChildrenOfType(root, PsiComment.class)) {
+      addCommentFolding(descriptors, comment);
+    }
 
     return descriptors.toArray(new FoldingDescriptor[0]);
   }
 
-  private void findRuleBlocks(List<FoldingDescriptor> descriptors, PsiElement root, String text) {
-    Pattern rulePattern = Pattern.compile(RULE_BLOCK, Pattern.MULTILINE);
-    Matcher matcher = rulePattern.matcher(text);
+  private void addRuleBlockFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull DroolsRuleBlock ruleBlock) {
+    TextRange range = ruleBlock.getTextRange();
+    if (range.getLength() < 2) return;
 
-    while (matcher.find()) {
-      int start = matcher.start();
-      int end = matcher.end();
-
-      if (end - start > 20) { // Only fold if the rule is reasonably long
-        TextRange range = TextRange.create(start, end);
-
-        // Capture the rule name here, while the matcher state is valid
-        String ruleName = "unknown";
-        try {
-          if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
-            ruleName = matcher.group(1);
+    String ruleName = extractRuleName(ruleBlock);
+    descriptors.add(
+        new FoldingDescriptor(ruleBlock.getNode(), range, null) {
+          @Override
+          public String getPlaceholderText() {
+            return "rule " + ruleName + " ...";
           }
-        } catch (IllegalStateException e) {
-          // If group extraction fails, use default name
-          ruleName = "rule";
-        }
+        });
+  }
 
-        // Create a final variable for use in lambda
-        final String finalRuleName = ruleName;
+  private void addImportGroupFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull PsiElement root) {
+    List<DroolsImportStatement> imports =
+        new ArrayList<>(PsiTreeUtil.findChildrenOfType(root, DroolsImportStatement.class));
 
+    if (imports.size() < 2) return;
+
+    // Find consecutive groups of import statements
+    int groupStart = 0;
+    while (groupStart < imports.size()) {
+      int groupEnd = groupStart;
+
+      // Extend the group while imports are consecutive (only whitespace/comments between them)
+      while (groupEnd + 1 < imports.size()
+          && areConsecutiveImports(imports.get(groupEnd), imports.get(groupEnd + 1))) {
+        groupEnd++;
+      }
+
+      // Only fold if there are at least 2 consecutive imports
+      if (groupEnd > groupStart) {
+        DroolsImportStatement first = imports.get(groupStart);
+        DroolsImportStatement last = imports.get(groupEnd);
+        TextRange range =
+            new TextRange(
+                first.getTextRange().getStartOffset(), last.getTextRange().getEndOffset());
+
+        int importCount = groupEnd - groupStart + 1;
         descriptors.add(
-            new FoldingDescriptor(root.getNode(), range) {
+            new FoldingDescriptor(first.getNode(), range, null) {
               @Override
               public String getPlaceholderText() {
-                return "rule \"" + finalRuleName + "\" { ... }";
+                return "import ... (" + importCount + " imports)";
               }
             });
       }
+
+      groupStart = groupEnd + 1;
     }
   }
 
-  private void findCommentBlocks(
-      List<FoldingDescriptor> descriptors, PsiElement root, String text) {
-    // Multi-line comments
-    Pattern multiCommentPattern = Pattern.compile(COMMENT_BLOCK, Pattern.MULTILINE);
-    Matcher matcher = multiCommentPattern.matcher(text);
-
-    while (matcher.find()) {
-      int start = matcher.start();
-      int end = matcher.end();
-
-      if (end - start > 30) { // Only fold longer comments
-        TextRange range = TextRange.create(start, end);
-        descriptors.add(
-            new FoldingDescriptor(root.getNode(), range) {
-              @Override
-              public String getPlaceholderText() {
-                return "/* ... */";
-              }
-            });
+  private boolean areConsecutiveImports(
+      @NotNull DroolsImportStatement first, @NotNull DroolsImportStatement second) {
+    // Check that there are no non-whitespace, non-comment elements between the two imports
+    PsiElement current = first.getNextSibling();
+    while (current != null && current != second) {
+      if (!(current instanceof com.intellij.psi.PsiWhiteSpace)
+          && !(current instanceof PsiComment)) {
+        return false;
       }
+      current = current.getNextSibling();
     }
+    return current == second;
+  }
 
-    // Consecutive single-line comments
-    Pattern lineCommentPattern = Pattern.compile(SINGLE_LINE_COMMENT, Pattern.MULTILINE);
-    matcher = lineCommentPattern.matcher(text);
+  private void addDeclareBlockFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull DroolsDeclareBlock declareBlock) {
+    TextRange range = declareBlock.getTextRange();
+    if (range.getLength() < 2) return;
 
-    while (matcher.find()) {
-      int start = matcher.start();
-      int end = matcher.end();
+    String name = extractDeclareName(declareBlock);
+    descriptors.add(
+        new FoldingDescriptor(declareBlock.getNode(), range, null) {
+          @Override
+          public String getPlaceholderText() {
+            return "declare " + name + " ...";
+          }
+        });
+  }
 
-      // Safely extract the matched group
-      String matchedGroup = "";
-      try {
-        if (matcher.groupCount() >= 1 && matcher.group(1) != null) {
-          matchedGroup = matcher.group(1);
-        }
-      } catch (IllegalStateException e) {
-        // If group extraction fails, use the entire match
-        matchedGroup = matcher.group(0);
-      }
+  private void addQueryDefFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull DroolsQueryDef queryDef) {
+    TextRange range = queryDef.getTextRange();
+    if (range.getLength() < 2) return;
 
-      long lineCount = matchedGroup.chars().filter(ch -> ch == '\n').count() + 1;
+    String name = extractQueryName(queryDef);
+    descriptors.add(
+        new FoldingDescriptor(queryDef.getNode(), range, null) {
+          @Override
+          public String getPlaceholderText() {
+            return "query " + name + " ...";
+          }
+        });
+  }
 
-      if (lineCount > 3) { // Fold if more than 3 consecutive comment lines
-        TextRange range = TextRange.create(start, end);
+  private void addFunctionDefFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull DroolsFunctionDef functionDef) {
+    TextRange range = functionDef.getTextRange();
+    if (range.getLength() < 2) return;
 
-        // Capture line count for lambda
-        final long finalLineCount = lineCount;
+    String name = extractFunctionName(functionDef);
+    descriptors.add(
+        new FoldingDescriptor(functionDef.getNode(), range, null) {
+          @Override
+          public String getPlaceholderText() {
+            return "function " + name + " ...";
+          }
+        });
+  }
 
-        descriptors.add(
-            new FoldingDescriptor(root.getNode(), range) {
-              @Override
-              public String getPlaceholderText() {
-                return "// ... (" + finalLineCount + " lines)";
-              }
-            });
-      }
+  private void addCommentFolding(
+      @NotNull List<FoldingDescriptor> descriptors, @NotNull PsiComment comment) {
+    String text = comment.getText();
+    // Only fold multi-line block comments (/* ... */)
+    if (text != null && text.startsWith("/*") && text.contains("\n")) {
+      TextRange range = comment.getTextRange();
+      descriptors.add(
+          new FoldingDescriptor(comment.getNode(), range, null) {
+            @Override
+            public String getPlaceholderText() {
+              return "/* ... */";
+            }
+          });
     }
+  }
+
+  @NotNull
+  private String extractRuleName(@NotNull DroolsRuleBlock ruleBlock) {
+    DroolsRuleName ruleName = ruleBlock.getRuleName();
+    if (ruleName == null) return UNNAMED;
+    String text = ruleName.getText();
+    if (text == null) return UNNAMED;
+    // Strip surrounding quotes if present
+    if (text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+      return text.substring(1, text.length() - 1);
+    }
+    return text;
+  }
+
+  @NotNull
+  private String extractDeclareName(@NotNull DroolsDeclareBlock declareBlock) {
+    PsiElement identifier = declareBlock.getIdentifier();
+    if (identifier != null) {
+      return identifier.getText();
+    }
+    return UNNAMED;
+  }
+
+  @NotNull
+  private String extractQueryName(@NotNull DroolsQueryDef queryDef) {
+    DroolsQueryName queryName = queryDef.getQueryName();
+    if (queryName == null) return UNNAMED;
+    // Try identifier first, then string
+    PsiElement identifier = queryName.getIdentifier();
+    if (identifier != null) return identifier.getText();
+    PsiElement string = queryName.getString();
+    if (string != null) {
+      String text = string.getText();
+      // Strip surrounding quotes if present
+      if (text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+        return text.substring(1, text.length() - 1);
+      }
+      return text;
+    }
+    return UNNAMED;
+  }
+
+  @NotNull
+  private String extractFunctionName(@NotNull DroolsFunctionDef functionDef) {
+    PsiElement identifier = functionDef.getIdentifier();
+    if (identifier != null) {
+      return identifier.getText();
+    }
+    return UNNAMED;
   }
 
   @Nullable
   @Override
   public String getPlaceholderText(@NotNull ASTNode node) {
-    return "{ ... }";
+    return "...";
   }
 
   @Override
   public boolean isCollapsedByDefault(@NotNull ASTNode node) {
-    return false; // Don't collapse by default
+    return false;
   }
 }

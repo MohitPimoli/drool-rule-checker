@@ -1,10 +1,13 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '1.17.3'
+    id 'org.jetbrains.grammarkit' version '2022.3.2.2'
+    id "org.owasp.dependencycheck" version "8.1.2"
+    id "org.sonarqube" version "4.4.1.3373"
 }
 
 group = 'com.plugin.drool'
-version = '1.0.11'
+version = '2.0.0'
 
 repositories {
     mavenCentral()
@@ -22,6 +25,7 @@ java {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'net.jqwik:jqwik:1.8.2'
 }
 
 // Configure Gradle IntelliJ Plugin
@@ -33,9 +37,32 @@ intellij {
     plugins = ['java']
 }
 
+// Grammar-Kit parser generation
+generateParser {
+    sourceFile = file('src/main/grammars/Drools.bnf')
+    targetRootOutputDir = file('src/main/gen')
+    pathToParser = 'com/plugin/drool/parser/DroolsParser.java'
+    pathToPsiRoot = 'com/plugin/drool/psi'
+}
+
+// JFlex lexer generation
+generateLexer {
+    sourceFile = file('src/main/grammars/Drools.flex')
+    targetOutputDir = file('src/main/gen/com/plugin/drool/lexer')
+    targetClass = '_DroolsLexer'
+}
+
+// Include generated sources
+sourceSets.main.java.srcDirs += 'src/main/gen'
+
 // Set the JVM compatibility versions
 tasks.withType(JavaCompile).configureEach {
     options.release = 17
+}
+
+// Ensure compilation depends on generated parser and lexer
+compileJava {
+    dependsOn generateParser, generateLexer
 }
 
 tasks {
@@ -43,6 +70,21 @@ tasks {
         sinceBuild = '250'
         version = project.version
         changeNotes = """
+            <h3>2.0.0 - Full Language Support</h3>
+            <ul>
+                <li>Grammar-Kit BNF parser with full AST and error recovery</li>
+                <li>JFlex-generated lexer replacing regex-based tokenization</li>
+                <li>Typed PSI elements for all DRL constructs (rules, patterns, constraints, imports)</li>
+                <li>Context-aware code completion (keywords, classes, methods, fields, data types)</li>
+                <li>Auto-import on class selection in when-clause</li>
+                <li>PSI-based validation with error/warning annotations</li>
+                <li>Go-to-definition for classes, methods, and binding variables</li>
+                <li>Structure view panel listing rules, queries, functions, and declarations</li>
+                <li>Quick-fix actions (add import, remove unused import, rename duplicate rule, add semicolon, remove binding)</li>
+                <li>PSI-based code folding for rules, imports, declares, queries, and functions</li>
+                <li>Bracket matching and comment/uncomment support</li>
+                <li>Resolution cache for fast class and binding variable lookups</li>
+            </ul>
             <h3>1.0.11</h3>
             <ul>
                 <li>Initial version of Drools syntax checker plugin</li>
@@ -68,5 +110,4 @@ tasks {
     }
 }
 
-// Disable the OWASP plugin for now as it's not properly applied
-// apply plugin: "org.owasp.dependencycheck"
+apply plugin: "org.owasp.dependencycheck"

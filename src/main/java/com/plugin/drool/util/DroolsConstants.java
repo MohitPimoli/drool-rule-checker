@@ -1,8 +1,8 @@
 package com.plugin.drool.util;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /** Centralized constants for Drools language support */
 public class DroolsConstants {
@@ -19,6 +19,9 @@ public class DroolsConstants {
     "global",
     "function",
     "declare",
+    "declare",
+    "rule",
+    "query",
     "dialect",
     "salience",
     "no-loop",
@@ -33,19 +36,19 @@ public class DroolsConstants {
   };
 
   // Drools built-in functions
-  public static final String[] FUNCTIONS = {
+  protected static final String[] FUNCTIONS = {
     "insert", "insertLogical", "update", "modify", "retract", "delete", "drools", "kcontext"
   };
 
   // Drools operators
-  public static final String[] OPERATORS = {
+  protected static final String[] OPERATORS = {
     "matches", "contains", "memberOf", "soundslike", "str",
     "in", "not in", "exists", "not exists", "forall",
     "from", "collect", "accumulate"
   };
 
   // Rule attributes
-  public static final String[] ATTRIBUTES = {
+  protected static final String[] ATTRIBUTES = {
     "salience",
     "no-loop",
     "ruleflow-group",
@@ -60,16 +63,16 @@ public class DroolsConstants {
   };
 
   // Rule templates for auto-completion
-  public static final String[] RULE_TEMPLATES = {
+  protected static final String[] RULE_TEMPLATES = {
     "rule \"Rule Name\"\nwhen\n    // conditions\nthen\n    // actions\nend",
     "rule \"Rule Name\"\n    salience 100\nwhen\n    // conditions\nthen\n    // actions\nend",
     "rule \"Rule Name\"\n    no-loop true\nwhen\n    // conditions\nthen\n    // actions\nend"
   };
 
   // Efficient keyword lookup
-  public static final Set<String> KEYWORD_SET = new HashSet<>(Arrays.asList(KEYWORDS));
-  public static final Set<String> FUNCTION_SET = new HashSet<>(Arrays.asList(FUNCTIONS));
-  public static final Set<String> OPERATOR_SET = new HashSet<>(Arrays.asList(OPERATORS));
+  protected static final Set<String> KEYWORD_SET = new HashSet<>(Arrays.asList(KEYWORDS));
+  protected static final Set<String> FUNCTION_SET = new HashSet<>(Arrays.asList(FUNCTIONS));
+  protected static final Set<String> OPERATOR_SET = new HashSet<>(Arrays.asList(OPERATORS));
 
   // Combined keyword pattern for regex
   public static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -90,7 +93,7 @@ public class DroolsConstants {
   }
 
   // Common Java classes that don't need imports (java.lang package)
-  public static final String[] JAVA_LANG_CLASSES = {
+  protected static final String[] JAVA_LANG_CLASSES = {
     "String",
     "Integer",
     "Long",
@@ -115,7 +118,7 @@ public class DroolsConstants {
   };
 
   // Drools built-in classes and types that don't need imports
-  public static final String[] DROOLS_BUILTIN_CLASSES = {
+  protected static final String[] DROOLS_BUILTIN_CLASSES = {
     "List",
     "Map",
     "Set",
@@ -152,7 +155,7 @@ public class DroolsConstants {
   };
 
   // Common words that appear in Drools but aren't class names
-  public static final String[] DROOLS_SYNTAX_WORDS = {
+  protected static final String[] DROOLS_SYNTAX_WORDS = {
     "Rule",
     "When",
     "Then",
@@ -206,10 +209,11 @@ public class DroolsConstants {
     "Payment"
   };
 
-  public static final Set<String> JAVA_LANG_SET = new HashSet<>(Arrays.asList(JAVA_LANG_CLASSES));
-  public static final Set<String> DROOLS_BUILTIN_SET =
+  protected static final Set<String> JAVA_LANG_SET =
+      new HashSet<>(Arrays.asList(JAVA_LANG_CLASSES));
+  protected static final Set<String> DROOLS_BUILTIN_SET =
       new HashSet<>(Arrays.asList(DROOLS_BUILTIN_CLASSES));
-  public static final Set<String> DROOLS_SYNTAX_SET =
+  protected static final Set<String> DROOLS_SYNTAX_SET =
       new HashSet<>(Arrays.asList(DROOLS_SYNTAX_WORDS));
 
   /** Check if a class is from java.lang package (doesn't need import) */
@@ -239,4 +243,6 @@ public class DroolsConstants {
 
   public static final String RULE_SPACE = "rule ";
   public static final String IMPORT = "import ";
+  public static final String UNNAMED = "<unnamed>";
+  public static final  String IDEA_RULES = "IntellijIdeaRulezzz";
 }

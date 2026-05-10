@@ -1,36 +1,49 @@
 <idea-plugin>
     <id>com.plugin.drool</id>
     <name>Drools Rule Checker</name>
-    <version>1.0.11</version>
+    <version>2.0.0</version>
     <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
 
     <description><![CDATA[
-        <h2>🔥 Drools Rule Checker - Professional IDE Support for Drools Rules</h2>
-        
-        <p>Transform your Drools development experience with comprehensive IDE support for <code>.drl</code> files. 
-        Get the same level of intelligent assistance you expect from modern IDEs - syntax highlighting, 
-        real-time validation, auto-completion, and error detection.</p>
+        <h2>🔥 Drools Rule Checker - Full Language Support for Drools Rules</h2>
+
+        <p>A comprehensive language support plugin for Drools Rule Language (<code>.drl</code>) files in IntelliJ IDEA.
+        Built on a proper Grammar-Kit BNF parser with typed PSI elements, delivering the same level of
+        intelligent assistance you expect from IntelliJ's native Java support.</p>
 
         <h3>✨ Key Features</h3>
         <ul>
             <li><strong>🎨 Advanced Syntax Highlighting</strong> - Beautiful color coding for keywords, strings, numbers, comments, operators, and punctuation</li>
-            <li><strong>🔍 Real-time Validation</strong> - Instant error detection as you type, just like in Java or other languages</li>
-            <li><strong>🚨 Comprehensive Error Detection</strong>:
+            <li><strong>🧠 Grammar-Based Parser</strong> - Full AST with error recovery for all DRL constructs (rules, patterns, constraints, imports, globals, functions, declares, queries)</li>
+            <li><strong>🔍 Real-time PSI-Based Validation</strong>:
                 <ul>
-                    <li>Missing brackets, parentheses, and braces</li>
-                    <li>Unclosed quotes and invalid escape sequences</li>
-                    <li>Missing semicolons in Java code blocks</li>
-                    <li>Invalid rule structure (rule → when → then → end)</li>
-                    <li>Common typos (wen → when, thn → then)</li>
-                    <li>Malformed constraint expressions</li>
-                    <li><strong>🆕 Missing import statements for unresolved classes</strong></li>
-                    <li><strong>🆕 Invalid import statement syntax</strong></li>
+                    <li>Rule structure validation (missing when/then/end, incorrect clause order)</li>
+                    <li>Rule attribute validation (numeric salience, date formats)</li>
+                    <li>Duplicate rule name detection</li>
+                    <li>Unresolved class references in fact patterns and globals</li>
+                    <li>Unbalanced parentheses and missing operators in constraints</li>
+                    <li>Unused binding variable warnings</li>
+                    <li>Java syntax errors in then-clauses (missing semicolons, unbalanced braces)</li>
+                    <li>Import validation (unresolvable, duplicate, unused imports)</li>
                 </ul>
             </li>
-            <li><strong>💡 Smart Auto-completion</strong> - Context-aware suggestions for keywords, functions, and rule templates</li>
-            <li><strong>📁 Code Folding</strong> - Collapse rule blocks and comments for better navigation</li>
-            <li><strong>🎯 Field Access Validation</strong> - Validates $variable.field patterns</li>
-            <li><strong>⚡ Performance Hints</strong> - Suggests optimizations (e.g., avoid eval() when possible)</li>
+            <li><strong>💡 Context-Aware Completion</strong>:
+                <ul>
+                    <li>Top-level keywords (package, import, global, rule, function, declare, query)</li>
+                    <li>Rule attributes (salience, no-loop, agenda-group, etc.)</li>
+                    <li>When-clause keywords (and, or, not, exists, forall, from, accumulate, eval)</li>
+                    <li>Then-clause functions (insert, update, modify, retract, delete, drools.halt)</li>
+                    <li>Class names from project classpath with auto-import</li>
+                    <li>Method and field completion after dot (getters, setters, bean properties)</li>
+                    <li>Data types (primitives, wrappers, project classes)</li>
+                </ul>
+            </li>
+            <li><strong>🔗 Go-To-Definition</strong> - Ctrl+Click navigation to Java classes, methods, and binding variable declarations</li>
+            <li><strong>📐 Structure View</strong> - Outline panel listing all rules, queries, functions, and declarations</li>
+            <li><strong>🔧 Quick Fixes</strong> - Add missing import, remove unused import, rename duplicate rule, add semicolon, remove unused binding</li>
+            <li><strong>📁 Code Folding</strong> - Collapse rules, import groups, declares, queries, functions, and multi-line comments</li>
+            <li><strong>🔲 Bracket Matching</strong> - Automatic matching for (), {}, []</li>
+            <li><strong>💬 Comment Support</strong> - Toggle line comments (//) and block comments (/* */)</li>
             <li><strong>🎨 Customizable Colors</strong> - Personalize syntax highlighting in IDE settings</li>
         </ul>
 
@@ -42,14 +55,17 @@
             <li>Anyone writing .drl files</li>
         </ul>
 
-        <h3>📋 Supported Drools Features</h3>
+        <h3>📋 Supported Drools Constructs</h3>
         <ul>
-            <li>Rule definitions with attributes (salience, no-loop, etc.)</li>
-            <li>When-Then-End clause validation</li>
-            <li>Java code blocks in 'then' clauses</li>
-            <li>Field constraints and expressions</li>
-            <li>Function calls and built-in operators</li>
-            <li>Comments (single-line and multi-line)</li>
+            <li>Package declarations and import statements</li>
+            <li>Rule definitions with all attributes (salience, no-loop, agenda-group, ruleflow-group, etc.)</li>
+            <li>When-clause patterns with fact types, binding variables, and constraints</li>
+            <li>Conditional elements (not, exists, forall, from, collect, accumulate, eval)</li>
+            <li>Then-clause Java/MVEL action code</li>
+            <li>Global declarations</li>
+            <li>Function definitions</li>
+            <li>Type declarations (declare blocks)</li>
+            <li>Query definitions</li>
         </ul>
 
         <h3>🔧 Installation</h3>
@@ -57,10 +73,10 @@
             <li>Go to <code>File → Settings → Plugins</code></li>
             <li>Search for "Drools Rule Checker"</li>
             <li>Click Install and restart IntelliJ IDEA</li>
-            <li>Open any <code>.drl</code> file and enjoy enhanced editing!</li>
+            <li>Open any <code>.drl</code> file and enjoy full language support!</li>
         </ol>
 
-        <h3>💻 Example Rule with Validation</h3>
+        <h3>💻 Example Rule with Full Support</h3>
         <pre><code>rule "Customer Discount"
     salience 100
     when
@@ -72,10 +88,10 @@
         System.out.println("Discount applied!");
 end</code></pre>
 
-        <p>The plugin will validate syntax, highlight errors, and provide intelligent suggestions as you type.</p>
+        <p>The plugin provides full parsing, validation, completion, navigation, and quick fixes as you type.</p>
 
         <h3>🐛 Bug Reports & Feature Requests</h3>
-        <p>Found an issue or have a suggestion? Please report it on our 
+        <p>Found an issue or have a suggestion? Please report it on our
         <a href="https://github.com/MohitPimoli/drool-rule-checker/issues">GitHub Issues</a> page.</p>
 
         <h3>⭐ Support the Project</h3>
@@ -97,6 +113,23 @@ end</code></pre>
     <depends>com.intellij.modules.java</depends>
 
     <change-notes><![CDATA[
+        <h3>Version 2.0.0 - Full Language Support (Major Rewrite)</h3>
+        <ul>
+            <li><strong>🧠 Grammar-Kit BNF Parser</strong> - Complete rewrite from regex-based to a proper recursive-descent parser with full AST and error recovery</li>
+            <li><strong>⚡ JFlex Lexer</strong> - Generated lexer replacing hand-written regex tokenization for reliable keyword/operator/string handling</li>
+            <li><strong>🌳 Typed PSI Elements</strong> - Rich PSI tree with typed nodes for all DRL constructs enabling structural queries</li>
+            <li><strong>💡 Context-Aware Completion</strong> - 7 specialized providers: keywords, attributes, when-clause, then-clause, class names, methods/fields, data types</li>
+            <li><strong>📦 Auto-Import</strong> - Automatically inserts import statements when selecting classes from completion</li>
+            <li><strong>🔗 Go-To-Definition</strong> - Ctrl+Click navigation to Java classes, methods, and binding variable declarations</li>
+            <li><strong>📐 Structure View</strong> - Outline panel listing all rules, queries, functions, and declarations for quick navigation</li>
+            <li><strong>🔧 Quick Fixes</strong> - Add missing import, remove unused import, rename duplicate rule, add semicolon, remove unused binding</li>
+            <li><strong>🔍 PSI-Based Validation</strong> - Comprehensive error detection: rule structure, attributes, duplicates, class resolution, constraints, bindings, Java syntax, imports</li>
+            <li><strong>📁 PSI-Based Folding</strong> - Fold rules, import groups, declares, queries, functions, and multi-line comments</li>
+            <li><strong>🔲 Bracket Matching</strong> - Automatic matching for (), {}, []</li>
+            <li><strong>💬 Comment/Uncomment</strong> - Toggle line comments (//) and block comments (/* */)</li>
+            <li><strong>🚀 Resolution Cache</strong> - Fast class and binding variable lookups with automatic invalidation</li>
+        </ul>
+
         <h3>Version 1.0.11 - Import Validation & Missing Dependencies</h3>
         <ul>
             <li><strong>🆕 Import Statement Validation</strong> - Real-time validation of import statements syntax</li>
@@ -149,6 +182,9 @@ end</code></pre>
         <!-- Color settings page for customization -->
         <colorSettingsPage implementation="com.plugin.drool.DroolsColorSettingsPage"/>
 
+        <!-- Project-level service for resolution caching -->
+        <projectService serviceImplementation="com.plugin.drool.DroolsResolutionCache"/>
+
         <!-- INTELLIGENT FEATURES -->
 
         <!-- Syntax error detection and validation -->
@@ -162,5 +198,21 @@ end</code></pre>
         <!-- Code folding support -->
         <lang.foldingBuilder language="Drools"
                              implementationClass="com.plugin.drool.DroolsFoldingBuilder"/>
+
+        <!-- Reference contributor for go-to-definition -->
+        <psi.referenceContributor language="Drools"
+                                   implementation="com.plugin.drool.DroolsReferenceContributor"/>
+
+        <!-- Structure view -->
+        <lang.psiStructureViewFactory language="Drools"
+                                       implementationClass="com.plugin.drool.DroolsStructureViewFactory"/>
+
+        <!-- Bracket matching -->
+        <lang.bracketMatcher language="Drools"
+                              implementationClass="com.plugin.drool.DroolsBracketMatcher"/>
+
+        <!-- Commenter -->
+        <lang.commenter language="Drools"
+                         implementationClass="com.plugin.drool.DroolsCommenter"/>
     </extensions>
 </idea-plugin>

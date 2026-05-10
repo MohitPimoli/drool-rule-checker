@@ -1,0 +1,378 @@
+{
+  parserClass="com.plugin.drool.parser.DroolsParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Drools"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.plugin.drool.psi"
+  psiImplPackage="com.plugin.drool.psi.impl"
+
+  elementTypeHolderClass="com.plugin.drool.psi.DroolsTypes"
+  elementTypeClass="com.plugin.drool.psi.DroolsElementType"
+  tokenTypeClass="com.plugin.drool.psi.DroolsTokenType"
+
+  tokens = [
+    // Whitespace and comments (handled by lexer, not consumed by parser)
+    WHITE_SPACE='regexp:\s+'
+    COMMENT='regexp://[^\r\n]*'
+
+    // Keywords
+    RULE_KEYWORD='rule'
+    WHEN_KEYWORD='when'
+    THEN_KEYWORD='then'
+    END_KEYWORD='end'
+    PACKAGE_KEYWORD='package'
+    IMPORT_KEYWORD='import'
+    GLOBAL_KEYWORD='global'
+    FUNCTION_KEYWORD='function'
+    DECLARE_KEYWORD='declare'
+    QUERY_KEYWORD='query'
+    SALIENCE_KEYWORD='salience'
+    NO_LOOP_KEYWORD='no-loop'
+    RULEFLOW_GROUP_KEYWORD='ruleflow-group'
+    AGENDA_GROUP_KEYWORD='agenda-group'
+    AUTO_FOCUS_KEYWORD='auto-focus'
+    LOCK_ON_ACTIVE_KEYWORD='lock-on-active'
+    DATE_EFFECTIVE_KEYWORD='date-effective'
+    DATE_EXPIRES_KEYWORD='date-expires'
+    ENABLED_KEYWORD='enabled'
+    DURATION_KEYWORD='duration'
+    TIMER_KEYWORD='timer'
+    DIALECT_KEYWORD='dialect'
+    EXTENDS_KEYWORD='extends'
+    AND_KEYWORD='and'
+    OR_KEYWORD='or'
+    NOT_KEYWORD='not'
+    EXISTS_KEYWORD='exists'
+    FORALL_KEYWORD='forall'
+    FROM_KEYWORD='from'
+    COLLECT_KEYWORD='collect'
+    ACCUMULATE_KEYWORD='accumulate'
+    EVAL_KEYWORD='eval'
+    INSERT_KEYWORD='insert'
+    INSERT_LOGICAL_KEYWORD='insertLogical'
+    UPDATE_KEYWORD='update'
+    MODIFY_KEYWORD='modify'
+    RETRACT_KEYWORD='retract'
+    DELETE_KEYWORD='delete'
+    MATCHES_KEYWORD='matches'
+    CONTAINS_KEYWORD='contains'
+    MEMBER_OF_KEYWORD='memberOf'
+    SOUNDSLIKE_KEYWORD='soundslike'
+    STR_KEYWORD='str'
+    IN_KEYWORD='in'
+    TRUE_KEYWORD='true'
+    FALSE_KEYWORD='false'
+    NULL_KEYWORD='null'
+    NEW_KEYWORD='new'
+    IF_KEYWORD='if'
+    ELSE_KEYWORD='else'
+    RETURN_KEYWORD='return'
+    THIS_KEYWORD='this'
+
+    // Literals and identifiers
+    IDENTIFIER='regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    NUMBER='regexp:[0-9]+(\.[0-9]+)?'
+    STRING='regexp:"([^"\\]|\\.)*"'
+
+    // Operators
+    OPERATOR='regexp:[=!<>+\-*/&|~^%?@#]+'
+
+    // Punctuation
+    LEFT_PAREN='('
+    RIGHT_PAREN=')'
+    LEFT_BRACE='{'
+    RIGHT_BRACE='}'
+    LEFT_BRACKET='['
+    RIGHT_BRACKET=']'
+    SEMICOLON=';'
+    COMMA=','
+    DOT='.'
+    COLON=':'
+    DOLLAR='$'
+  ]
+}
+
+// ==========================================
+// Root rule
+// ==========================================
+droolsFile ::= packageDecl? importStatement* topLevelItem* {
+  pin=1
+}
+
+// ==========================================
+// Package declaration
+// ==========================================
+packageDecl ::= PACKAGE_KEYWORD qualifiedName SEMICOLON? {
+  pin=1
+  recoverWhile=packageDeclRecover
+}
+private packageDeclRecover ::= !(IMPORT_KEYWORD | GLOBAL_KEYWORD | RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | <<eof>>)
+
+// ==========================================
+// Import statement
+// ==========================================
+importStatement ::= IMPORT_KEYWORD importPath SEMICOLON? {
+  pin=1
+  recoverWhile=importStatementRecover
+  extends="com.plugin.drool.psi.mixin.DroolsImportStatementMixin"
+}
+private importStatementRecover ::= !(IMPORT_KEYWORD | GLOBAL_KEYWORD | RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | PACKAGE_KEYWORD | <<eof>>)
+
+importPath ::= qualifiedName (DOT OPERATOR)? // OPERATOR covers '*' for wildcard imports
+
+// ==========================================
+// Top-level items
+// ==========================================
+private topLevelItem ::= globalDecl | ruleBlock | functionDef | declareBlock | queryDef {
+  recoverWhile=topLevelItemRecover
+}
+private topLevelItemRecover ::= !(GLOBAL_KEYWORD | RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | <<eof>>)
+
+// ==========================================
+// Global declaration
+// ==========================================
+globalDecl ::= GLOBAL_KEYWORD typeName IDENTIFIER SEMICOLON? {
+  pin=1
+  recoverWhile=globalDeclRecover
+}
+private globalDeclRecover ::= !(IMPORT_KEYWORD | GLOBAL_KEYWORD | RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | <<eof>>)
+
+// ==========================================
+// Rule block
+// ==========================================
+ruleBlock ::= RULE_KEYWORD ruleName ruleAttributes? whenClause thenClause END_KEYWORD {
+  pin=1
+  recoverWhile=ruleBlockRecover
+  extends="com.plugin.drool.psi.mixin.DroolsRuleBlockMixin"
+}
+private ruleBlockRecover ::= !(RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | GLOBAL_KEYWORD | IMPORT_KEYWORD | <<eof>>)
+
+ruleName ::= STRING | IDENTIFIER (DOT IDENTIFIER)*
+
+// ==========================================
+// Rule attributes
+// ==========================================
+ruleAttributes ::= ruleAttribute+ {
+  recoverWhile=ruleAttributesRecover
+}
+private ruleAttributesRecover ::= !(WHEN_KEYWORD | THEN_KEYWORD | END_KEYWORD | RULE_KEYWORD | <<eof>>)
+
+ruleAttribute ::= salienceAttribute
+                 | noLoopAttribute
+                 | ruleflowGroupAttribute
+                 | agendaGroupAttribute
+                 | autoFocusAttribute
+                 | lockOnActiveAttribute
+                 | dateEffectiveAttribute
+                 | dateExpiresAttribute
+                 | enabledAttribute
+                 | durationAttribute
+                 | timerAttribute
+                 | dialectAttribute
+                 | extendsAttribute {
+  recoverWhile=ruleAttributeRecover
+}
+private ruleAttributeRecover ::= !(SALIENCE_KEYWORD | NO_LOOP_KEYWORD | RULEFLOW_GROUP_KEYWORD | AGENDA_GROUP_KEYWORD | AUTO_FOCUS_KEYWORD | LOCK_ON_ACTIVE_KEYWORD | DATE_EFFECTIVE_KEYWORD | DATE_EXPIRES_KEYWORD | ENABLED_KEYWORD | DURATION_KEYWORD | TIMER_KEYWORD | DIALECT_KEYWORD | EXTENDS_KEYWORD | WHEN_KEYWORD | THEN_KEYWORD | END_KEYWORD | RULE_KEYWORD | <<eof>>)
+
+salienceAttribute ::= SALIENCE_KEYWORD attributeValue {pin=1}
+noLoopAttribute ::= NO_LOOP_KEYWORD attributeValue? {pin=1}
+ruleflowGroupAttribute ::= RULEFLOW_GROUP_KEYWORD attributeValue {pin=1}
+agendaGroupAttribute ::= AGENDA_GROUP_KEYWORD attributeValue {pin=1}
+autoFocusAttribute ::= AUTO_FOCUS_KEYWORD attributeValue? {pin=1}
+lockOnActiveAttribute ::= LOCK_ON_ACTIVE_KEYWORD attributeValue? {pin=1}
+dateEffectiveAttribute ::= DATE_EFFECTIVE_KEYWORD attributeValue {pin=1}
+dateExpiresAttribute ::= DATE_EXPIRES_KEYWORD attributeValue {pin=1}
+enabledAttribute ::= ENABLED_KEYWORD attributeValue {pin=1}
+durationAttribute ::= DURATION_KEYWORD attributeValue {pin=1}
+timerAttribute ::= TIMER_KEYWORD attributeValue {pin=1}
+dialectAttribute ::= DIALECT_KEYWORD attributeValue {pin=1}
+extendsAttribute ::= EXTENDS_KEYWORD attributeValue {pin=1}
+
+attributeValue ::= NUMBER | STRING | IDENTIFIER | TRUE_KEYWORD | FALSE_KEYWORD
+
+// ==========================================
+// When clause
+// ==========================================
+whenClause ::= WHEN_KEYWORD pattern* {
+  pin=1
+  recoverWhile=whenClauseRecover
+  extends="com.plugin.drool.psi.mixin.DroolsWhenClauseMixin"
+}
+private whenClauseRecover ::= !(THEN_KEYWORD | END_KEYWORD | RULE_KEYWORD | <<eof>>)
+
+pattern ::= bindingPattern | conditionalElement | factPattern {
+  recoverWhile=patternRecover
+}
+private patternRecover ::= !(THEN_KEYWORD | END_KEYWORD | AND_KEYWORD | OR_KEYWORD | NOT_KEYWORD | EXISTS_KEYWORD | FORALL_KEYWORD | IDENTIFIER | DOLLAR | LEFT_PAREN | <<eof>>)
+
+bindingPattern ::= bindingVariable COLON factPattern
+
+bindingVariable ::= DOLLAR IDENTIFIER {
+  extends="com.plugin.drool.psi.mixin.DroolsBindingVariableMixin"
+}
+
+conditionalElement ::= notElement | existsElement | forallElement | evalElement | accumElement | fromElement
+
+notElement ::= NOT_KEYWORD (LEFT_PAREN pattern+ RIGHT_PAREN | factPattern) {pin=1}
+existsElement ::= EXISTS_KEYWORD (LEFT_PAREN pattern+ RIGHT_PAREN | factPattern) {pin=1}
+forallElement ::= FORALL_KEYWORD LEFT_PAREN pattern+ RIGHT_PAREN {pin=1}
+evalElement ::= EVAL_KEYWORD LEFT_PAREN expressionContent RIGHT_PAREN {pin=1}
+accumElement ::= ACCUMULATE_KEYWORD LEFT_PAREN pattern COMMA accumulateFunction+ RIGHT_PAREN {pin=1}
+fromElement ::= factPattern FROM_KEYWORD expression {pin=2}
+
+accumulateFunction ::= IDENTIFIER LEFT_PAREN expressionContent RIGHT_PAREN
+
+// ==========================================
+// Fact pattern
+// ==========================================
+factPattern ::= className LEFT_PAREN constraintList? RIGHT_PAREN (logicalConnective pattern)? {
+  pin=2
+  recoverWhile=factPatternRecover
+  extends="com.plugin.drool.psi.mixin.DroolsFactPatternMixin"
+}
+private factPatternRecover ::= !(THEN_KEYWORD | END_KEYWORD | AND_KEYWORD | OR_KEYWORD | NOT_KEYWORD | EXISTS_KEYWORD | FORALL_KEYWORD | IDENTIFIER | DOLLAR | LEFT_PAREN | SEMICOLON | <<eof>>)
+
+className ::= IDENTIFIER (DOT IDENTIFIER)*
+
+constraintList ::= constraintExpr (COMMA constraintExpr)*
+
+constraintExpr ::= constraintOr {
+  recoverWhile=constraintExprRecover
+  extends="com.plugin.drool.psi.mixin.DroolsConstraintExprMixin"
+}
+private constraintExprRecover ::= !(COMMA | RIGHT_PAREN | <<eof>>)
+
+private constraintOr ::= constraintAnd (OPERATOR constraintAnd)*
+private constraintAnd ::= constraintAtom (OPERATOR constraintAtom)*
+private constraintAtom ::= fieldAccessOrValue (constraintOperator fieldAccessOrValue)?
+                         | LEFT_PAREN constraintOr RIGHT_PAREN
+
+constraintOperator ::= OPERATOR
+                      | MATCHES_KEYWORD
+                      | CONTAINS_KEYWORD
+                      | MEMBER_OF_KEYWORD
+                      | SOUNDSLIKE_KEYWORD
+                      | STR_KEYWORD
+                      | IN_KEYWORD
+                      | NOT_KEYWORD IN_KEYWORD
+
+private fieldAccessOrValue ::= (DOLLAR? IDENTIFIER | THIS_KEYWORD) (DOT IDENTIFIER (LEFT_PAREN expressionContent? RIGHT_PAREN)?)*
+                              | literal
+                              | NEW_KEYWORD className LEFT_PAREN expressionContent? RIGHT_PAREN
+
+logicalConnective ::= AND_KEYWORD | OR_KEYWORD
+
+// ==========================================
+// Then clause
+// ==========================================
+thenClause ::= THEN_KEYWORD javaStatement* {
+  pin=1
+  recoverWhile=thenClauseRecover
+}
+private thenClauseRecover ::= !(END_KEYWORD | RULE_KEYWORD | <<eof>>)
+
+javaStatement ::= javaStatementContent SEMICOLON {
+  recoverWhile=javaStatementRecover
+}
+private javaStatementRecover ::= !(SEMICOLON | END_KEYWORD | RULE_KEYWORD | <<eof>>)
+
+private javaStatementContent ::= statementToken+
+private statementToken ::= IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR
+                          | LEFT_PAREN expressionContent? RIGHT_PAREN
+                          | LEFT_BRACE blockContent? RIGHT_BRACE
+                          | LEFT_BRACKET expressionContent? RIGHT_BRACKET
+                          | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
+                          | IF_KEYWORD | ELSE_KEYWORD | RETURN_KEYWORD
+                          | INSERT_KEYWORD | INSERT_LOGICAL_KEYWORD | UPDATE_KEYWORD
+                          | MODIFY_KEYWORD | RETRACT_KEYWORD | DELETE_KEYWORD
+
+// ==========================================
+// Function definition
+// ==========================================
+functionDef ::= FUNCTION_KEYWORD typeName? IDENTIFIER LEFT_PAREN parameterList? RIGHT_PAREN functionBody {
+  pin=1
+  recoverWhile=functionDefRecover
+}
+private functionDefRecover ::= !(RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | GLOBAL_KEYWORD | IMPORT_KEYWORD | <<eof>>)
+
+parameterList ::= parameter (COMMA parameter)*
+parameter ::= typeName IDENTIFIER
+
+functionBody ::= LEFT_BRACE blockContent? RIGHT_BRACE
+
+// ==========================================
+// Declare block
+// ==========================================
+declareBlock ::= DECLARE_KEYWORD IDENTIFIER declareExtends? declareField* END_KEYWORD {
+  pin=1
+  recoverWhile=declareBlockRecover
+}
+private declareBlockRecover ::= !(RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | GLOBAL_KEYWORD | IMPORT_KEYWORD | <<eof>>)
+
+declareExtends ::= EXTENDS_KEYWORD className
+
+declareField ::= IDENTIFIER COLON typeName (OPERATOR attributeValue)? SEMICOLON? {
+  recoverWhile=declareFieldRecover
+}
+private declareFieldRecover ::= !(IDENTIFIER | END_KEYWORD | <<eof>>)
+
+// ==========================================
+// Query definition
+// ==========================================
+queryDef ::= QUERY_KEYWORD queryName queryParams? pattern* END_KEYWORD {
+  pin=1
+  recoverWhile=queryDefRecover
+}
+private queryDefRecover ::= !(RULE_KEYWORD | FUNCTION_KEYWORD | DECLARE_KEYWORD | QUERY_KEYWORD | GLOBAL_KEYWORD | IMPORT_KEYWORD | <<eof>>)
+
+queryName ::= STRING | IDENTIFIER
+queryParams ::= LEFT_PAREN parameter (COMMA parameter)* RIGHT_PAREN
+
+// ==========================================
+// Common rules
+// ==========================================
+qualifiedName ::= IDENTIFIER (DOT IDENTIFIER)*
+
+typeName ::= className typeArguments? arrayBrackets?
+typeArguments ::= OPERATOR className (COMMA className)* OPERATOR  // < and > are operators in the lexer
+arrayBrackets ::= LEFT_BRACKET RIGHT_BRACKET
+
+literal ::= NUMBER | STRING | TRUE_KEYWORD | FALSE_KEYWORD | NULL_KEYWORD
+
+expression ::= expressionToken+
+private expressionToken ::= IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR | SEMICOLON
+                           | LEFT_PAREN expressionContent? RIGHT_PAREN
+                           | LEFT_BRACE blockContent? RIGHT_BRACE
+                           | LEFT_BRACKET expressionContent? RIGHT_BRACKET
+                           | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
+                           | NOT_KEYWORD | AND_KEYWORD | OR_KEYWORD
+
+// Helper for balanced parentheses content
+expressionContent ::= expressionContentToken+
+private expressionContentToken ::= IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR | SEMICOLON
+                                  | LEFT_PAREN expressionContent? RIGHT_PAREN
+                                  | LEFT_BRACE blockContent? RIGHT_BRACE
+                                  | LEFT_BRACKET expressionContent? RIGHT_BRACKET
+                                  | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
+                                  | NOT_KEYWORD | AND_KEYWORD | OR_KEYWORD | FROM_KEYWORD
+                                  | IF_KEYWORD | ELSE_KEYWORD | RETURN_KEYWORD
+                                  | INSERT_KEYWORD | INSERT_LOGICAL_KEYWORD | UPDATE_KEYWORD
+                                  | MODIFY_KEYWORD | RETRACT_KEYWORD | DELETE_KEYWORD
+                                  | MATCHES_KEYWORD | CONTAINS_KEYWORD | MEMBER_OF_KEYWORD
+                                  | IN_KEYWORD | EVAL_KEYWORD | COLLECT_KEYWORD | ACCUMULATE_KEYWORD
+
+// Helper for balanced brace content
+blockContent ::= blockContentToken+
+private blockContentToken ::= IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR | SEMICOLON
+                             | LEFT_PAREN expressionContent? RIGHT_PAREN
+                             | LEFT_BRACE blockContent? RIGHT_BRACE
+                             | LEFT_BRACKET expressionContent? RIGHT_BRACKET
+                             | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
+                             | NOT_KEYWORD | AND_KEYWORD | OR_KEYWORD | FROM_KEYWORD
+                             | IF_KEYWORD | ELSE_KEYWORD | RETURN_KEYWORD
+                             | INSERT_KEYWORD | INSERT_LOGICAL_KEYWORD | UPDATE_KEYWORD
+                             | MODIFY_KEYWORD | RETRACT_KEYWORD | DELETE_KEYWORD
+                             | MATCHES_KEYWORD | CONTAINS_KEYWORD | MEMBER_OF_KEYWORD
+                             | IN_KEYWORD | EVAL_KEYWORD | COLLECT_KEYWORD | ACCUMULATE_KEYWORD

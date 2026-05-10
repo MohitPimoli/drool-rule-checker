@@ -49,7 +49,7 @@ public class DroolsSyntaxHighlighter extends SyntaxHighlighterBase {
   @NotNull
   @Override
   public Lexer getHighlightingLexer() {
-    return new DroolsLexer();
+    return new DroolsLexerAdapter();
   }
 
   @NotNull
