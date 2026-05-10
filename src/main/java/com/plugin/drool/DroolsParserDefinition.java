@@ -37,13 +37,13 @@ public class DroolsParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public TokenSet getCommentTokens() {
-    return DroolsTokenTypes.COMMENTS;
+    return TokenSet.create(DroolsTypes.COMMENT);
   }
 
   @NotNull
   @Override
   public TokenSet getStringLiteralElements() {
-    return DroolsTokenTypes.STRINGS;
+    return TokenSet.create(DroolsTypes.STRING);
   }
 
   @NotNull

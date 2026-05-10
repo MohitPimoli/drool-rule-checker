@@ -3,7 +3,7 @@ package com.plugin.drool.lexer;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.TokenType;
-import com.plugin.drool.DroolsTokenTypes;
+import com.plugin.drool.psi.DroolsTypes;
 
 %%
 
@@ -45,170 +45,170 @@ SingleLineComment = "//" [^\r\n]*
 
 <YYINITIAL> {
   // Whitespace
-  {AnyWhiteSpace}                    { return DroolsTokenTypes.WHITE_SPACE; }
+  {AnyWhiteSpace}                    { return TokenType.WHITE_SPACE; }
 
   // Single-line comments
-  {SingleLineComment}                { return DroolsTokenTypes.COMMENT; }
+  {SingleLineComment}                { return DroolsTypes.COMMENT; }
 
   // Multi-line comment start
-  "/*"                               { yybegin(BLOCK_COMMENT); return DroolsTokenTypes.COMMENT; }
+  "/*"                               { yybegin(BLOCK_COMMENT); return DroolsTypes.COMMENT; }
 
   // String literal start
-  \"                                 { yybegin(STRING); return DroolsTokenTypes.STRING; }
+  \"                                 { yybegin(STRING); return DroolsTypes.STRING; }
 
   // Drools keywords - core structure
-  "rule"                             { return DroolsTokenTypes.KEYWORD; }
-  "when"                             { return DroolsTokenTypes.KEYWORD; }
-  "then"                             { return DroolsTokenTypes.KEYWORD; }
-  "end"                              { return DroolsTokenTypes.KEYWORD; }
-  "package"                          { return DroolsTokenTypes.KEYWORD; }
-  "import"                           { return DroolsTokenTypes.KEYWORD; }
-  "global"                           { return DroolsTokenTypes.KEYWORD; }
-  "function"                         { return DroolsTokenTypes.KEYWORD; }
-  "declare"                          { return DroolsTokenTypes.KEYWORD; }
-  "query"                            { return DroolsTokenTypes.KEYWORD; }
+  "rule"                             { return DroolsTypes.RULE_KEYWORD; }
+  "when"                             { return DroolsTypes.WHEN_KEYWORD; }
+  "then"                             { return DroolsTypes.THEN_KEYWORD; }
+  "end"                              { return DroolsTypes.END_KEYWORD; }
+  "package"                          { return DroolsTypes.PACKAGE_KEYWORD; }
+  "import"                           { return DroolsTypes.IMPORT_KEYWORD; }
+  "global"                           { return DroolsTypes.GLOBAL_KEYWORD; }
+  "function"                         { return DroolsTypes.FUNCTION_KEYWORD; }
+  "declare"                          { return DroolsTypes.DECLARE_KEYWORD; }
+  "query"                            { return DroolsTypes.QUERY_KEYWORD; }
 
   // Drools keywords - rule attributes
-  "salience"                         { return DroolsTokenTypes.KEYWORD; }
-  "no-loop"                          { return DroolsTokenTypes.KEYWORD; }
-  "ruleflow-group"                   { return DroolsTokenTypes.KEYWORD; }
-  "agenda-group"                     { return DroolsTokenTypes.KEYWORD; }
-  "auto-focus"                       { return DroolsTokenTypes.KEYWORD; }
-  "lock-on-active"                   { return DroolsTokenTypes.KEYWORD; }
-  "date-effective"                   { return DroolsTokenTypes.KEYWORD; }
-  "date-expires"                     { return DroolsTokenTypes.KEYWORD; }
-  "enabled"                          { return DroolsTokenTypes.KEYWORD; }
-  "duration"                         { return DroolsTokenTypes.KEYWORD; }
-  "timer"                            { return DroolsTokenTypes.KEYWORD; }
-  "dialect"                          { return DroolsTokenTypes.KEYWORD; }
-  "extends"                          { return DroolsTokenTypes.KEYWORD; }
+  "salience"                         { return DroolsTypes.SALIENCE_KEYWORD; }
+  "no-loop"                          { return DroolsTypes.NO_LOOP_KEYWORD; }
+  "ruleflow-group"                   { return DroolsTypes.RULEFLOW_GROUP_KEYWORD; }
+  "agenda-group"                     { return DroolsTypes.AGENDA_GROUP_KEYWORD; }
+  "auto-focus"                       { return DroolsTypes.AUTO_FOCUS_KEYWORD; }
+  "lock-on-active"                   { return DroolsTypes.LOCK_ON_ACTIVE_KEYWORD; }
+  "date-effective"                   { return DroolsTypes.DATE_EFFECTIVE_KEYWORD; }
+  "date-expires"                     { return DroolsTypes.DATE_EXPIRES_KEYWORD; }
+  "enabled"                          { return DroolsTypes.ENABLED_KEYWORD; }
+  "duration"                         { return DroolsTypes.DURATION_KEYWORD; }
+  "timer"                            { return DroolsTypes.TIMER_KEYWORD; }
+  "dialect"                          { return DroolsTypes.DIALECT_KEYWORD; }
+  "extends"                          { return DroolsTypes.EXTENDS_KEYWORD; }
 
   // Drools keywords - conditional
-  "and"                              { return DroolsTokenTypes.KEYWORD; }
-  "or"                               { return DroolsTokenTypes.KEYWORD; }
-  "not"                              { return DroolsTokenTypes.KEYWORD; }
-  "exists"                           { return DroolsTokenTypes.KEYWORD; }
-  "forall"                           { return DroolsTokenTypes.KEYWORD; }
-  "from"                             { return DroolsTokenTypes.KEYWORD; }
-  "collect"                          { return DroolsTokenTypes.KEYWORD; }
-  "accumulate"                       { return DroolsTokenTypes.KEYWORD; }
-  "eval"                             { return DroolsTokenTypes.KEYWORD; }
+  "and"                              { return DroolsTypes.AND_KEYWORD; }
+  "or"                               { return DroolsTypes.OR_KEYWORD; }
+  "not"                              { return DroolsTypes.NOT_KEYWORD; }
+  "exists"                           { return DroolsTypes.EXISTS_KEYWORD; }
+  "forall"                           { return DroolsTypes.FORALL_KEYWORD; }
+  "from"                             { return DroolsTypes.FROM_KEYWORD; }
+  "collect"                          { return DroolsTypes.COLLECT_KEYWORD; }
+  "accumulate"                       { return DroolsTypes.ACCUMULATE_KEYWORD; }
+  "eval"                             { return DroolsTypes.EVAL_KEYWORD; }
 
   // Drools keywords - action functions
-  "insert"                           { return DroolsTokenTypes.KEYWORD; }
-  "insertLogical"                    { return DroolsTokenTypes.KEYWORD; }
-  "update"                           { return DroolsTokenTypes.KEYWORD; }
-  "modify"                           { return DroolsTokenTypes.KEYWORD; }
-  "retract"                          { return DroolsTokenTypes.KEYWORD; }
-  "delete"                           { return DroolsTokenTypes.KEYWORD; }
+  "insert"                           { return DroolsTypes.INSERT_KEYWORD; }
+  "insertLogical"                    { return DroolsTypes.INSERT_LOGICAL_KEYWORD; }
+  "update"                           { return DroolsTypes.UPDATE_KEYWORD; }
+  "modify"                           { return DroolsTypes.MODIFY_KEYWORD; }
+  "retract"                          { return DroolsTypes.RETRACT_KEYWORD; }
+  "delete"                           { return DroolsTypes.DELETE_KEYWORD; }
 
   // Drools keywords - operators
-  "matches"                          { return DroolsTokenTypes.KEYWORD; }
-  "contains"                         { return DroolsTokenTypes.KEYWORD; }
-  "memberOf"                         { return DroolsTokenTypes.KEYWORD; }
-  "soundslike"                       { return DroolsTokenTypes.KEYWORD; }
-  "str"                              { return DroolsTokenTypes.KEYWORD; }
-  "in"                               { return DroolsTokenTypes.KEYWORD; }
+  "matches"                          { return DroolsTypes.MATCHES_KEYWORD; }
+  "contains"                         { return DroolsTypes.CONTAINS_KEYWORD; }
+  "memberOf"                         { return DroolsTypes.MEMBER_OF_KEYWORD; }
+  "soundslike"                       { return DroolsTypes.SOUNDSLIKE_KEYWORD; }
+  "str"                              { return DroolsTypes.STR_KEYWORD; }
+  "in"                               { return DroolsTypes.IN_KEYWORD; }
 
   // Java/MVEL keywords commonly used in Drools
-  "true"                             { return DroolsTokenTypes.KEYWORD; }
-  "false"                            { return DroolsTokenTypes.KEYWORD; }
-  "null"                             { return DroolsTokenTypes.KEYWORD; }
-  "new"                              { return DroolsTokenTypes.KEYWORD; }
-  "if"                               { return DroolsTokenTypes.KEYWORD; }
-  "else"                             { return DroolsTokenTypes.KEYWORD; }
-  "return"                           { return DroolsTokenTypes.KEYWORD; }
-  "this"                             { return DroolsTokenTypes.KEYWORD; }
+  "true"                             { return DroolsTypes.TRUE_KEYWORD; }
+  "false"                            { return DroolsTypes.FALSE_KEYWORD; }
+  "null"                             { return DroolsTypes.NULL_KEYWORD; }
+  "new"                              { return DroolsTypes.NEW_KEYWORD; }
+  "if"                               { return DroolsTypes.IF_KEYWORD; }
+  "else"                             { return DroolsTypes.ELSE_KEYWORD; }
+  "return"                           { return DroolsTypes.RETURN_KEYWORD; }
+  "this"                             { return DroolsTypes.THIS_KEYWORD; }
 
   // Binding variable prefix ($identifier)
-  "$"{Identifier}                    { return DroolsTokenTypes.IDENTIFIER; }
+  "$"{Identifier}                    { return DroolsTypes.IDENTIFIER; }
 
   // Dollar sign alone
-  "$"                                { return DroolsTokenTypes.DOLLAR; }
+  "$"                                { return DroolsTypes.DOLLAR; }
 
   // Identifiers (must come after keywords)
-  {Identifier}                       { return DroolsTokenTypes.IDENTIFIER; }
+  {Identifier}                       { return DroolsTypes.IDENTIFIER; }
 
   // Number literals
-  {NumberLiteral}                    { return DroolsTokenTypes.NUMBER; }
+  {NumberLiteral}                    { return DroolsTypes.NUMBER; }
 
   // Multi-character operators
-  "=="                               { return DroolsTokenTypes.OPERATOR; }
-  "!="                               { return DroolsTokenTypes.OPERATOR; }
-  ">="                               { return DroolsTokenTypes.OPERATOR; }
-  "<="                               { return DroolsTokenTypes.OPERATOR; }
-  "&&"                               { return DroolsTokenTypes.OPERATOR; }
-  "||"                               { return DroolsTokenTypes.OPERATOR; }
-  "->"                               { return DroolsTokenTypes.OPERATOR; }
-  "+="                               { return DroolsTokenTypes.OPERATOR; }
-  "-="                               { return DroolsTokenTypes.OPERATOR; }
-  "*="                               { return DroolsTokenTypes.OPERATOR; }
-  "/="                               { return DroolsTokenTypes.OPERATOR; }
+  "=="                               { return DroolsTypes.OPERATOR; }
+  "!="                               { return DroolsTypes.OPERATOR; }
+  ">="                               { return DroolsTypes.OPERATOR; }
+  "<="                               { return DroolsTypes.OPERATOR; }
+  "&&"                               { return DroolsTypes.OPERATOR; }
+  "||"                               { return DroolsTypes.OPERATOR; }
+  "->"                               { return DroolsTypes.OPERATOR; }
+  "+="                               { return DroolsTypes.OPERATOR; }
+  "-="                               { return DroolsTypes.OPERATOR; }
+  "*="                               { return DroolsTypes.OPERATOR; }
+  "/="                               { return DroolsTypes.OPERATOR; }
 
   // Single-character operators
-  "="                                { return DroolsTokenTypes.OPERATOR; }
-  ">"                                { return DroolsTokenTypes.OPERATOR; }
-  "<"                                { return DroolsTokenTypes.OPERATOR; }
-  "!"                                { return DroolsTokenTypes.OPERATOR; }
-  "+"                                { return DroolsTokenTypes.OPERATOR; }
-  "-"                                { return DroolsTokenTypes.OPERATOR; }
-  "*"                                { return DroolsTokenTypes.OPERATOR; }
-  "/"                                { return DroolsTokenTypes.OPERATOR; }
-  "&"                                { return DroolsTokenTypes.OPERATOR; }
-  "|"                                { return DroolsTokenTypes.OPERATOR; }
-  "~"                                { return DroolsTokenTypes.OPERATOR; }
-  "^"                                { return DroolsTokenTypes.OPERATOR; }
-  "%"                                { return DroolsTokenTypes.OPERATOR; }
-  "?"                                { return DroolsTokenTypes.OPERATOR; }
+  "="                                { return DroolsTypes.OPERATOR; }
+  ">"                                { return DroolsTypes.OPERATOR; }
+  "<"                                { return DroolsTypes.OPERATOR; }
+  "!"                                { return DroolsTypes.OPERATOR; }
+  "+"                                { return DroolsTypes.OPERATOR; }
+  "-"                                { return DroolsTypes.OPERATOR; }
+  "*"                                { return DroolsTypes.OPERATOR; }
+  "/"                                { return DroolsTypes.OPERATOR; }
+  "&"                                { return DroolsTypes.OPERATOR; }
+  "|"                                { return DroolsTypes.OPERATOR; }
+  "~"                                { return DroolsTypes.OPERATOR; }
+  "^"                                { return DroolsTypes.OPERATOR; }
+  "%"                                { return DroolsTypes.OPERATOR; }
+  "?"                                { return DroolsTypes.OPERATOR; }
 
   // Punctuation and delimiters
-  "("                                { return DroolsTokenTypes.LEFT_PAREN; }
-  ")"                                { return DroolsTokenTypes.RIGHT_PAREN; }
-  "{"                                { return DroolsTokenTypes.LEFT_BRACE; }
-  "}"                                { return DroolsTokenTypes.RIGHT_BRACE; }
-  "["                                { return DroolsTokenTypes.LEFT_BRACKET; }
-  "]"                                { return DroolsTokenTypes.RIGHT_BRACKET; }
-  ";"                                { return DroolsTokenTypes.SEMICOLON; }
-  ","                                { return DroolsTokenTypes.COMMA; }
-  "."                                { return DroolsTokenTypes.DOT; }
-  ":"                                { return DroolsTokenTypes.COLON; }
-  "@"                                { return DroolsTokenTypes.OPERATOR; }
-  "#"                                { return DroolsTokenTypes.OPERATOR; }
+  "("                                { return DroolsTypes.LEFT_PAREN; }
+  ")"                                { return DroolsTypes.RIGHT_PAREN; }
+  "{"                                { return DroolsTypes.LEFT_BRACE; }
+  "}"                                { return DroolsTypes.RIGHT_BRACE; }
+  "["                                { return DroolsTypes.LEFT_BRACKET; }
+  "]"                                { return DroolsTypes.RIGHT_BRACKET; }
+  ";"                                { return DroolsTypes.SEMICOLON; }
+  ","                                { return DroolsTypes.COMMA; }
+  "."                                { return DroolsTypes.DOT; }
+  ":"                                { return DroolsTypes.COLON; }
+  "@"                                { return DroolsTypes.OPERATOR; }
+  "#"                                { return DroolsTypes.OPERATOR; }
 
   // Any other character is a bad character
-  [^]                                { return DroolsTokenTypes.BAD_CHARACTER; }
+  [^]                                { return TokenType.BAD_CHARACTER; }
 }
 
 <STRING> {
   // End of string
-  \"                                 { yybegin(YYINITIAL); return DroolsTokenTypes.STRING; }
+  \"                                 { yybegin(YYINITIAL); return DroolsTypes.STRING; }
 
   // Escape sequences
-  \\\"                               { return DroolsTokenTypes.STRING; }
-  \\\\                               { return DroolsTokenTypes.STRING; }
-  \\n                                { return DroolsTokenTypes.STRING; }
-  \\r                                { return DroolsTokenTypes.STRING; }
-  \\t                                { return DroolsTokenTypes.STRING; }
-  \\b                                { return DroolsTokenTypes.STRING; }
-  \\f                                { return DroolsTokenTypes.STRING; }
-  \\[0-3]?[0-7]{1,2}                { return DroolsTokenTypes.STRING; }
-  \\u[0-9a-fA-F]{4}                 { return DroolsTokenTypes.STRING; }
+  \\\"                               { return DroolsTypes.STRING; }
+  \\\\                               { return DroolsTypes.STRING; }
+  \\n                                { return DroolsTypes.STRING; }
+  \\r                                { return DroolsTypes.STRING; }
+  \\t                                { return DroolsTypes.STRING; }
+  \\b                                { return DroolsTypes.STRING; }
+  \\f                                { return DroolsTypes.STRING; }
+  \\[0-3]?[0-7]{1,2}                { return DroolsTypes.STRING; }
+  \\u[0-9a-fA-F]{4}                 { return DroolsTypes.STRING; }
 
   // Any other escape (invalid but still part of string)
-  \\.                                { return DroolsTokenTypes.STRING; }
+  \\.                                { return DroolsTypes.STRING; }
 
   // String content (anything except quote, backslash, or newline)
-  [^\"\\\r\n]+                       { return DroolsTokenTypes.STRING; }
+  [^\"\\\r\n]+                       { return DroolsTypes.STRING; }
 
   // Unterminated string at end of line
-  {LineTerminator}                   { yybegin(YYINITIAL); return DroolsTokenTypes.BAD_CHARACTER; }
+  {LineTerminator}                   { yybegin(YYINITIAL); return TokenType.BAD_CHARACTER; }
 }
 
 <BLOCK_COMMENT> {
   // End of block comment
-  "*/"                               { yybegin(YYINITIAL); return DroolsTokenTypes.COMMENT; }
+  "*/"                               { yybegin(YYINITIAL); return DroolsTypes.COMMENT; }
 
   // Comment content
-  [^*]+                              { return DroolsTokenTypes.COMMENT; }
-  "*"                                { return DroolsTokenTypes.COMMENT; }
+  [^*]+                              { return DroolsTypes.COMMENT; }
+  "*"                                { return DroolsTypes.COMMENT; }
 }
