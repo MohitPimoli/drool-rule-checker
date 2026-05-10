@@ -249,7 +249,7 @@ public class DroolsCompletionContributor extends CompletionContributor {
 
     private static final java.util.regex.Pattern LOCAL_VAR_PATTERN =
         java.util.regex.Pattern.compile(
-            "^\\s*([A-Z][\\w<>\\[\\],\\s]*)\\s+(\\w+)\\s*=", java.util.regex.Pattern.MULTILINE);
+            "^\\s*([a-zA-Z][\\w<>\\[\\],\\s.]*)\\s+(\\w+)\\s*=", java.util.regex.Pattern.MULTILINE);
 
     @Override
     protected void addCompletions(
