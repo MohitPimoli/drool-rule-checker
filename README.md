@@ -1,107 +1,176 @@
-# 🔥 Drools Rule Checker
+# Drools Rule Checker — IntelliJ IDEA Plugin for DRL Files
 
-[![JetBrains Plugin](https://img.shields.io/badge/JetBrains-Plugin-orange.svg)](https://plugins.jetbrains.com/plugin/your-plugin-id)
-[![Version](https://img.shields.io/badge/version-1.0.11-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
+[![JetBrains Plugin](https://img.shields.io/badge/JetBrains_Marketplace-Drools_Rule_Checker-orange.svg)](https://plugins.jetbrains.com/plugin/26requirement-drool-rule-checker)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Downloads](https://img.shields.io/badge/downloads-1K+-brightgreen.svg)](https://plugins.jetbrains.com/plugin/your-plugin-id)
+[![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2024.2+-purple.svg)](https://www.jetbrains.com/idea/)
+[![Java](https://img.shields.io/badge/Java-17+-red.svg)](https://openjdk.org/)
 
-**Professional IDE support for Drools Rule Language (.drl) files in IntelliJ IDEA**
+**Full language support for Drools Rule Language (.drl) files in IntelliJ IDEA** — grammar-based parsing, context-aware code completion, go-to-definition, real-time validation, quick fixes, and more.
 
-Transform your Drools development experience with comprehensive IDE features including syntax highlighting, real-time validation, auto-completion, and intelligent error detection - just like you'd expect from modern Java development.
+The most comprehensive Drools IDE plugin available. Write Drools rules with the same level of intelligent assistance you get for Java.
 
-<!-- ![Plugin Demo](docs/images/demo.gif) -->
+---
 
-## ✨ Features
+## Why Drools Rule Checker?
 
-### 🎨 **Advanced Syntax Highlighting**
-- Beautiful color coding for all Drools elements
-- Keywords, operators, strings, numbers, comments
-- Punctuation and bracket highlighting
-- Customizable color schemes
+If you write Drools rules in IntelliJ IDEA, you've probably noticed there's no built-in support for `.drl` files. No syntax highlighting, no completion, no error checking. This plugin fixes that.
 
-### 🔍 **Real-time Validation & Error Detection**
-- **Bracket Matching**: Detects unmatched `()`, `{}`, `[]`
-- **Quote Validation**: Finds unclosed strings and invalid escapes
-- **Semicolon Detection**: Missing `;` in Java code blocks
-- **Rule Structure**: Validates `rule → when → then → end` sequence
-- **Typo Detection**: Catches common mistakes (`wen` → `when`, `thn` → `then`)
-- **Expression Validation**: Validates constraint expressions and field access
+**Drools Rule Checker** gives you:
+- A proper **grammar-based parser** that understands DRL structure
+- **Code completion** that knows your project's classes, methods, and fields
+- **Go-to-definition** — Ctrl+Click on class names to jump to Java source
+- **Real-time validation** — see errors as you type, not at deploy time
+- **Quick fixes** — one-click solutions for common problems
 
-### 💡 **Smart Auto-completion**
-- Context-aware keyword suggestions
-- Built-in function completion with parameter hints
-- Rule templates for quick scaffolding
-- Drools operators and attributes
+---
 
-### 📁 **Code Navigation & Organization**
-- Code folding for rule blocks and comments
-- Intelligent bracket matching
-- Structure view support
+## Features
 
-## 🚀 Quick Start
+### Grammar-Based Parser with Error Recovery
+Built on Grammar-Kit BNF and JFlex, the parser produces a full AST for all DRL constructs. If one rule has a syntax error, the rest of the file still parses correctly.
 
-### Installation from JetBrains Marketplace
+- Package declarations, imports, globals
+- Rule blocks with attributes (salience, no-loop, agenda-group, etc.)
+- When-clause patterns with fact types, binding variables, and constraints
+- Conditional elements (not, exists, forall, from, collect, accumulate, eval)
+- Then-clause Java/MVEL action code
+- Function definitions, type declarations, queries
+
+### Context-Aware Code Completion
+
+| Context | What's Suggested |
+|---------|-----------------|
+| File top level | `package`, `import`, `global`, `rule`, `function`, `declare`, `query` |
+| Inside rule (before when) | `salience`, `no-loop`, `agenda-group`, `ruleflow-group`, `timer`, etc. |
+| Inside when-clause | `and`, `or`, `not`, `exists`, `forall`, `from`, `accumulate`, `eval` |
+| Inside then-clause | `insert`, `update`, `modify`, `retract`, `delete`, `drools.halt` |
+| After `$variable.` | Methods and fields of the bound type |
+| At type positions | Classes from project classpath with auto-import |
+| Inside constraints | Bean properties of the fact type |
+
+### Go-To-Definition (Ctrl+Click)
+- Click on a **class name** → navigate to Java source or decompiled class
+- Click on a **method call** → navigate to the method definition
+- Click on a **binding variable** (`$customer`) → navigate to its declaration in the when-clause
+
+### Real-Time Validation
+| Check | Severity |
+|-------|----------|
+| Missing when/then/end clauses | Error |
+| Incorrect clause order | Error |
+| Unresolvable class in fact pattern | Error |
+| Unresolvable import | Error |
+| Unbalanced parentheses in constraints | Error |
+| Invalid salience value (non-numeric) | Error |
+| Invalid date format in attributes | Error |
+| Unresolvable global type | Error |
+| Duplicate rule names | Warning |
+| Unused binding variables | Warning |
+| Duplicate imports | Warning |
+| Unused imports | Weak Warning |
+
+### Quick Fixes
+- **Add missing import** — one click to insert the import statement
+- **Remove unused import** — clean up unused imports
+- **Rename duplicate rule** — auto-append numeric suffix
+- **Add missing semicolon** — insert `;` at the right position
+- **Remove unused binding** — convert `$var : Type()` to `Type()`
+
+### Structure View
+Outline panel showing all rules, queries, functions, and declarations. Click to navigate.
+
+### Code Folding
+Collapse rule blocks, import groups, declare blocks, queries, functions, and multi-line comments.
+
+### Bracket Matching & Commenter
+- Automatic bracket matching for `()`, `{}`, `[]`
+- Toggle line comments (`//`) and block comments (`/* */`) with keyboard shortcuts
+
+---
+
+## Installation
+
+### From JetBrains Marketplace (Recommended)
 1. Open IntelliJ IDEA
-2. Go to `File → Settings → Plugins`
-3. Search for "Drools Rule Checker"
-4. Click **Install** and restart IDE
-5. Open any `.drl` file and enjoy enhanced editing!
+2. Go to **File → Settings → Plugins**
+3. Search for **"Drools Rule Checker"**
+4. Click **Install** and restart
 
 ### Manual Installation
-1. Download the latest release from [GitHub Releases](https://github.com/MohitPimoli/drool-rule-checker/releases)
-2. Go to `Settings → Plugins → ⚙️ → Install Plugin from Disk...`
-3. Select the downloaded ZIP file
-4. Restart IntelliJ IDEA
+1. Download the latest `.zip` from [GitHub Releases](https://github.com/MohitPimoli/drool-rule-checker/releases)
+2. Go to **Settings → Plugins → ⚙️ → Install Plugin from Disk...**
+3. Select the ZIP file and restart
 
-## 📋 Usage Examples
+---
 
-### ✅ Valid Drools Rule
+## Usage Example
+
 ```drools
-rule "Customer Discount"
+package com.example.rules;
+
+import com.example.model.Customer;
+import com.example.model.Order;
+
+global org.slf4j.Logger log;
+
+rule "Apply Premium Discount"
     salience 100
     no-loop true
     when
-        $customer : Customer(age > 18, status == "ACTIVE")
-        $order : Order(total > 1000.00) from $customer.orders
+        $customer : Customer(loyaltyTier == "PREMIUM", active == true)
+        $order : Order(total > 500.00) from $customer.getOrders()
     then
-        $order.setDiscount(0.15);
+        double discount = $order.getTotal() * 0.20;
+        $order.setDiscount(discount);
         update($order);
-        System.out.println("Discount applied to: " + $customer.getName());
+        log.info("Applied 20% discount of {} to order {}", discount, $order.getId());
 end
 ```
 
-### ❌ Common Errors Detected
-```drools
-rule "Invalid Rule"
-    when
-        $customer : Customer(age > 18
-        // ❌ Missing closing parenthesis
-    then
-        $order.setDiscount(0.15)
-        // ❌ Missing semicolon
-        update($order)
-        // ❌ Missing semicolon
-end
-```
+With this plugin installed, you get:
+- Syntax highlighting for all elements
+- Completion after `$customer.` showing `Customer` methods
+- Completion after `$order.` showing `Order` methods
+- Ctrl+Click on `Customer` navigates to the Java class
+- Warning if `$customer` is declared but never used
+- Error if `Customer` class can't be resolved on classpath
 
-## 🛠️ Development
+---
+
+## Supported Drools Constructs
+
+- ✅ Package declarations
+- ✅ Import statements (including wildcard)
+- ✅ Global declarations
+- ✅ Rule definitions with all attributes
+- ✅ When-clause patterns and constraints
+- ✅ Binding variables (`$var : Type()`)
+- ✅ Conditional elements (not, exists, forall, from, collect, accumulate, eval)
+- ✅ Then-clause Java/MVEL code
+- ✅ Function definitions
+- ✅ Type declarations (declare blocks)
+- ✅ Query definitions
+
+---
+
+## Building from Source
 
 ### Prerequisites
-- IntelliJ IDEA 2024.2+
 - Java 17+
-- Gradle 8.0+
+- Gradle 8.0+ (wrapper included)
+- IntelliJ IDEA 2024.2+ (for running/debugging)
 
-### Building from Source
+### Build Commands
 ```bash
-# Clone the repository
 git clone https://github.com/MohitPimoli/drool-rule-checker.git
 cd drool-rule-checker
 
-# Run in development mode
-./gradlew runIde
+# Build the plugin
+./gradlew clean buildPlugin
 
-# Build plugin distribution
-./gradlew buildPlugin
+# Run in a sandboxed IDE for testing
+./gradlew runIde
 
 # Run tests
 ./gradlew test
@@ -109,102 +178,63 @@ cd drool-rule-checker
 
 ### Project Structure
 ```
-src/main/java/com/plugin/drool/
-├── DroolsLanguage.java              # Language definition
-├── DroolsFileType.java              # File type association
-├── DroolsLexer.java                 # Tokenization
-├── DroolsParser.java                # AST parsing
-├── DroolsAnnotator.java             # Real-time validation
-├── DroolsSyntaxHighlighter.java     # Syntax highlighting
-├── DroolsCompletionContributor.java # Auto-completion
-├── DroolsFoldingBuilder.java        # Code folding
-└── util/
-    ├── DroolsConstants.java         # Language constants
-    └── Pattern.java                 # Validation patterns
+src/main/
+├── grammars/
+│   ├── Drools.bnf          # Grammar-Kit BNF grammar
+│   └── Drools.flex         # JFlex lexer specification
+├── gen/                     # Generated parser and PSI classes
+├── java/com/plugin/drool/
+│   ├── DroolsLanguage.java
+│   ├── DroolsParserDefinition.java
+│   ├── DroolsLexerAdapter.java
+│   ├── DroolsAnnotator.java           # PSI-based validation
+│   ├── DroolsCompletionContributor.java # Context-aware completion
+│   ├── DroolsReferenceContributor.java  # Go-to-definition
+│   ├── DroolsStructureViewFactory.java  # Outline panel
+│   ├── DroolsFoldingBuilder.java        # Code folding
+│   ├── DroolsResolutionCache.java       # Class resolution cache
+│   ├── psi/mixin/                       # Typed PSI mixins
+│   └── fixes/                           # Quick-fix actions
+└── resources/META-INF/
+    └── plugin.xml
 ```
-
-## 🎯 Supported Drools Features
-
-- ✅ Rule definitions with attributes
-- ✅ When-Then-End clause validation
-- ✅ Java code blocks in actions
-- ✅ Field constraints and expressions
-- ✅ Built-in functions and operators
-- ✅ Comments (single-line and multi-line)
-- ✅ Variable binding (`$variable`)
-- ✅ Function calls with parameter validation
-
-## 📊 Validation Features
-
-| Feature | Description | Severity |
-|---------|-------------|----------|
-| Bracket Matching | Unmatched `()`, `{}`, `[]` | Error |
-| Missing Semicolons | Java statements without `;` | Error |
-| Unclosed Strings | Missing closing quotes | Error |
-| Rule Structure | Invalid rule sequence | Error |
-| Typos | Common keyword mistakes | Error |
-| Field Access | Complex field chains | Warning |
-| Performance | `eval()` usage hints | Weak Warning |
-
-## 🎨 Customization
-
-Customize syntax highlighting colors:
-1. Go to `Settings → Editor → Color Scheme → Drools`
-2. Adjust colors for different token types
-3. Apply and enjoy your personalized theme!
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. **🐛 Report Bugs**: [Create an issue](https://github.com/MohitPimoli/drool-rule-checker/issues)
-2. **💡 Suggest Features**: Share your ideas in discussions
-3. **🔧 Submit PRs**: Fork, develop, and submit pull requests
-4. **📝 Improve Docs**: Help us improve documentation
-5. **⭐ Star the Project**: Show your support!
-
-### Development Guidelines
-- Follow existing code style and patterns
-- Add tests for new functionality
-- Update documentation for API changes
-- Ensure backward compatibility
-
-## 📈 Roadmap
-
-### 🔮 Upcoming Features
-- [ ] **Advanced Parser**: Full grammar-based parsing
-- [ ] **Semantic Analysis**: Type checking and variable resolution
-- [ ] **Refactoring Support**: Rename, extract rule, etc.
-- [ ] **Live Templates**: Predefined code snippets
-- [ ] **Drools Integration**: Runtime validation
-- [ ] **Performance Profiling**: Rule execution insights
-- [ ] **Unit Test Support**: Test framework integration
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- JetBrains for the excellent IntelliJ Platform SDK
-- Drools community for inspiration and feedback
-- Contributors who help improve this plugin
-
-## 📞 Support
-
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/MohitPimoli/drool-rule-checker/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/MohitPimoli/drool-rule-checker/discussions)
-- 📧 **Email**: mohitpimoli31@gmail.com
-- 🌟 **Rate & Review**: [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/your-plugin-id)
 
 ---
 
-<div align="center">
+## Compatibility
 
-**Made with ❤️ for the Drools community**
+| IDE | Version |
+|-----|---------|
+| IntelliJ IDEA Community | 2024.2+ |
+| IntelliJ IDEA Ultimate | 2024.2+ |
 
-[⭐ Star on GitHub](https://github.com/MohitPimoli/drool-rule-checker) • 
-<!-- [📥 Download Plugin](https://plugins.jetbrains.com/plugin/your-plugin-id) • -->
-[🐛 Report Issues](https://github.com/MohitPimoli/drool-rule-checker/issues)
+Requires the Java plugin to be enabled (for classpath resolution and go-to-definition).
 
-</div>
+---
+
+## Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+- 🐛 [Report bugs](https://github.com/MohitPimoli/drool-rule-checker/issues)
+- 💡 [Request features](https://github.com/MohitPimoli/drool-rule-checker/issues)
+- 🔧 Submit pull requests
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## Links
+
+- [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/26requirement-drool-rule-checker)
+- [GitHub Repository](https://github.com/MohitPimoli/drool-rule-checker)
+- [Issue Tracker](https://github.com/MohitPimoli/drool-rule-checker/issues)
+- [Changelog](CHANGELOG.md)
+
+---
+
+**Keywords**: Drools, DRL, IntelliJ IDEA plugin, Drools IDE, Drools editor, Drools syntax highlighting, Drools code completion, Drools validation, rule engine, business rules, JBoss Drools, KIE, .drl files, Drools IntelliJ, Drools JetBrains
