@@ -1,7 +1,5 @@
 package com.plugin.drool;
 
-import static com.plugin.drool.util.DroolsConstants.KEYWORDS;
-
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
@@ -56,6 +54,10 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
+
+import static com.plugin.drool.util.DroolsConstants.JAVA_DOT_LANG_DOT;
+import static com.plugin.drool.util.DroolsConstants.KEYWORDS;
+import static com.plugin.drool.util.DroolsConstants.OBJECT;
 
 /**
  * Context-aware completion contributor for Drools Rule Language files. Uses PSI-based element
@@ -245,6 +247,10 @@ public class DroolsCompletionContributor extends CompletionContributor {
       {"kcontext", "Knowledge context"}
     };
 
+    private static final java.util.regex.Pattern LOCAL_VAR_PATTERN =
+        java.util.regex.Pattern.compile(
+            "^\\s*([A-Z][\\w<>\\[\\],\\s]*)\\s+(\\w+)\\s*=", java.util.regex.Pattern.MULTILINE);
+
     @Override
     protected void addCompletions(
         @NotNull CompletionParameters parameters,
@@ -289,6 +295,77 @@ public class DroolsCompletionContributor extends CompletionContributor {
                         ctx.getEditor().getCaretModel().moveToOffset(offset + 1);
                       }));
         }
+      }
+
+      // Also suggest local variables declared earlier in the then-clause
+      DroolsThenClause thenClause =
+          PsiTreeUtil.getParentOfType(parameters.getPosition(), DroolsThenClause.class);
+      if (thenClause != null) {
+        addLocalVariables(thenClause, parameters.getPosition(), result);
+      }
+
+      // Also suggest binding variables from the when-clause
+      DroolsRuleBlock ruleBlock =
+          PsiTreeUtil.getParentOfType(parameters.getPosition(), DroolsRuleBlock.class);
+      if (ruleBlock != null) {
+        addBindingVariables(ruleBlock, result);
+      }
+    }
+
+    private void addLocalVariables(
+        @NotNull DroolsThenClause thenClause,
+        @NotNull PsiElement cursorPosition,
+        @NotNull CompletionResultSet result) {
+      String thenText = thenClause.getText();
+      int cursorOffsetInThen = cursorPosition.getTextOffset() - thenClause.getTextOffset();
+      if (cursorOffsetInThen <= 0) return;
+
+      // Only scan text before the cursor position
+      String textBeforeCursor =
+          thenText.substring(0, Math.min(cursorOffsetInThen, thenText.length()));
+
+      java.util.regex.Matcher matcher = LOCAL_VAR_PATTERN.matcher(textBeforeCursor);
+      Set<String> addedVars = new HashSet<>();
+      while (matcher.find()) {
+        String typeName = matcher.group(1).trim();
+        String varName = matcher.group(2);
+        if (varName != null && !varName.isEmpty() && addedVars.add(varName)) {
+          result.addElement(
+              PrioritizedLookupElement.withPriority(
+                  LookupElementBuilder.create(varName)
+                      .withTypeText(typeName, true)
+                      .withIcon(AllIcons.Nodes.Variable),
+                  90));
+        }
+      }
+    }
+
+    private void addBindingVariables(
+        @NotNull DroolsRuleBlock ruleBlock, @NotNull CompletionResultSet result) {
+      Project project = ruleBlock.getProject();
+      DroolsResolutionCache cache = DroolsResolutionCache.getInstance(project);
+      Map<String, DroolsBindingVariable> bindings = cache.getBindingsForRule(ruleBlock);
+
+      for (Map.Entry<String, DroolsBindingVariable> entry : bindings.entrySet()) {
+        String varName = entry.getKey();
+        DroolsBindingVariable bindingVar = entry.getValue();
+
+        String typeName = OBJECT;
+        PsiElement parent = bindingVar.getParent();
+        if (parent instanceof DroolsBindingPattern bindingPattern) {
+          DroolsFactPattern factPattern =
+              PsiTreeUtil.getChildOfType(bindingPattern, DroolsFactPattern.class);
+          if (factPattern != null) {
+            typeName = factPattern.getClassName().getText();
+          }
+        }
+
+        result.addElement(
+            PrioritizedLookupElement.withPriority(
+                LookupElementBuilder.create(varName)
+                    .withTypeText(typeName, true)
+                    .withIcon(AllIcons.Nodes.Variable),
+                95));
       }
     }
   }
@@ -373,7 +450,8 @@ public class DroolsCompletionContributor extends CompletionContributor {
     }
 
     private boolean isJavaLangClass(String qualifiedName) {
-      return qualifiedName.startsWith("java.lang.") && !qualifiedName.substring(10).contains(".");
+      return qualifiedName.startsWith(JAVA_DOT_LANG_DOT)
+          && !qualifiedName.substring(10).contains(".");
     }
 
     private String getPackageName(String qualifiedName) {
@@ -475,7 +553,7 @@ public class DroolsCompletionContributor extends CompletionContributor {
       if (text == null || text.isEmpty()) return null;
 
       // Strip $ prefix for binding variables
-      String lookupName = text.startsWith("$") ? text : text;
+      //      String lookupName = text.startsWith("$") ? text : text;-
 
       // Try to resolve as a binding variable first
       DroolsRuleBlock ruleBlock = PsiTreeUtil.getParentOfType(context, DroolsRuleBlock.class);
@@ -524,10 +602,8 @@ public class DroolsCompletionContributor extends CompletionContributor {
       }
 
       // Try java.lang
-      resolved = cache.resolveClass("java.lang." + className, context);
-      if (resolved != null) return resolved;
-
-      return null;
+      resolved = cache.resolveClass(JAVA_DOT_LANG_DOT + className, context);
+      return resolved;
     }
 
     private boolean isStaticContext(String text, PsiElement context, Project project) {
@@ -573,7 +649,7 @@ public class DroolsCompletionContributor extends CompletionContributor {
 
         if (propertyName != null && addedProperties.add(propertyName)) {
           PsiType returnType = method.getReturnType();
-          String typeText = returnType != null ? returnType.getPresentableText() : "Object";
+          String typeText = returnType != null ? returnType.getPresentableText() : OBJECT;
           result.addElement(
               LookupElementBuilder.create(propertyName)
                   .withTypeText(typeText, true)
@@ -701,7 +777,7 @@ public class DroolsCompletionContributor extends CompletionContributor {
       "Byte",
       "Short",
       "String",
-      "Object",
+      OBJECT,
       "Number"
     };
 
@@ -851,7 +927,8 @@ public class DroolsCompletionContributor extends CompletionContributor {
     @Override
     public void handleInsert(@NotNull InsertionContext context, @NotNull LookupElement item) {
       if (alreadyImported) return;
-      if (qualifiedName.startsWith("java.lang.") && !qualifiedName.substring(10).contains(".")) {
+      if (qualifiedName.startsWith(JAVA_DOT_LANG_DOT)
+          && !qualifiedName.substring(10).contains(".")) {
         return; // java.lang classes don't need import
       }
 

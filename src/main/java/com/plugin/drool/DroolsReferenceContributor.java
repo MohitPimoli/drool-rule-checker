@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static com.plugin.drool.util.DroolsConstants.IDEA_RULES;
+import static com.plugin.drool.util.DroolsConstants.JAVA_DOT_LANG_DOT;
 
 /**
  * Provides PsiReference implementations for navigable elements in Drools files. Enables
@@ -243,7 +244,7 @@ public class DroolsReferenceContributor extends PsiReferenceContributor {
     private final String className;
 
     DroolsClassReference(@NotNull PsiElement element, @NotNull String className) {
-      super(element, calculateTextRange(element, className));
+      super(element, calculateTextRange(element));
       this.className = className;
     }
 
@@ -303,9 +304,8 @@ public class DroolsReferenceContributor extends PsiReferenceContributor {
     private PsiElement getNavigableElement(@NotNull PsiClass psiClass) {
       // IntelliJ handles decompiled class navigation automatically.
       // PsiClass from a JAR will navigate to the decompiled view.
-      return psiClass.getNavigationElement();
-      //  PsiElement navigationElement = psiClass.getNavigationElement();-
-      //      return Objects.isNull(navigationElement) ? psiClass : navigationElement;-
+      PsiElement navigationElement = psiClass.getNavigationElement();
+      return navigationElement != null ? navigationElement : psiClass;
     }
 
     @Override
@@ -313,12 +313,7 @@ public class DroolsReferenceContributor extends PsiReferenceContributor {
       return EMPTY_ARRAY;
     }
 
-    private static TextRange calculateTextRange(PsiElement element, String className) {
-      String elementText = element.getText();
-      if (elementText != null && elementText.contains(className)) {
-        int start = elementText.indexOf(className);
-        return new TextRange(start, start + className.length());
-      }
+    private static TextRange calculateTextRange(PsiElement element) {
       return new TextRange(0, element.getTextLength());
     }
   }
@@ -349,18 +344,16 @@ public class DroolsReferenceContributor extends PsiReferenceContributor {
       // Find the method by name
       for (PsiMethod method : resolvedClass.getAllMethods()) {
         if (method.getName().equals(methodName)) {
-          //          PsiElement nav = method.getNavigationElement();-
-          //          return nav != null ? nav : method;-
-          return method.getNavigationElement();
+          PsiElement nav = method.getNavigationElement();
+          return nav != null ? nav : method;
         }
       }
 
       // Also check fields (for field access after dot)
       for (PsiField field : resolvedClass.getAllFields()) {
         if (field.getName().equals(methodName)) {
-          //          PsiElement nav =  field.getNavigationElement();-
-          //          return nav != null ? nav : field;-
-          return field.getNavigationElement();
+          PsiElement nav = field.getNavigationElement();
+          return nav != null ? nav : field;
         }
       }
 
@@ -428,7 +421,7 @@ public class DroolsReferenceContributor extends PsiReferenceContributor {
       }
 
       // Try java.lang
-      resolved = cache.resolveClass("java.lang." + className, context);
+      resolved = cache.resolveClass(JAVA_DOT_LANG_DOT + className, context);
       return resolved;
     }
   }

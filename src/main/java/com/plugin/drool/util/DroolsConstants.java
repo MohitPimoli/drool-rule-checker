@@ -244,5 +244,7 @@ public class DroolsConstants {
   public static final String RULE_SPACE = "rule ";
   public static final String IMPORT = "import ";
   public static final String UNNAMED = "<unnamed>";
-  public static final  String IDEA_RULES = "IntellijIdeaRulezzz";
+  public static final String IDEA_RULES = "IntellijIdeaRulezzz";
+  public static final String OBJECT = "Object";
+  public static final String JAVA_DOT_LANG_DOT = "java.lang.";
 }

@@ -205,7 +205,7 @@ public final class DroolsResolutionCache {
         psiClass =
             facade.findClass(
                 fqn, GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
-          return psiClass;
+        return psiClass;
       }
     }
 
@@ -230,7 +230,7 @@ public final class DroolsResolutionCache {
       @NotNull PsiElement element, @NotNull Map<String, DroolsBindingVariable> bindings) {
     if (element instanceof DroolsBindingVariable bindingVar) {
       String name = bindingVar.getIdentifier().getText();
-      bindings.put(name, bindingVar);
+      bindings.put("$" + name, bindingVar);
     }
     for (PsiElement child : element.getChildren()) {
       collectBindingVariables(child, bindings);
