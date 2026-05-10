@@ -28,9 +28,9 @@ public class DroolsThenClauseImpl extends ASTWrapperPsiElement implements Drools
   }
 
   @Override
-  @NotNull
-  public List<DroolsJavaStatement> getJavaStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, DroolsJavaStatement.class);
+  @Nullable
+  public DroolsThenContent getThenContent() {
+    return findChildByClass(DroolsThenContent.class);
   }
 
 }

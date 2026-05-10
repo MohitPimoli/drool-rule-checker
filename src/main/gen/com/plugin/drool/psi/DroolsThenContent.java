@@ -5,12 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface DroolsJavaStatement extends PsiElement {
+public interface DroolsThenContent extends PsiElement {
 
   @NotNull
-  List<DroolsBlockContent> getBlockContentList();
-
-  @NotNull
-  List<DroolsExpressionContent> getExpressionContentList();
+  List<DroolsThenContent> getThenContentList();
 
 }

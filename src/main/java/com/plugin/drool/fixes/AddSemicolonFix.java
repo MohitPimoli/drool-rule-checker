@@ -9,14 +9,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.plugin.drool.DroolsPsiFile;
-import com.plugin.drool.psi.DroolsJavaStatement;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Quick-fix that inserts a missing semicolon at the end of a Java statement in the then-clause.
- * Inserts {@code ;} at the end of the statement text (before any trailing whitespace/newline).
+ * Quick-fix that inserts a missing semicolon at the end of the current line in the then-clause.
+ * Inserts {@code ;} at the end of the line where the caret is positioned.
  */
 public class AddSemicolonFix implements IntentionAction, LocalQuickFix {
 
@@ -49,19 +47,30 @@ public class AddSemicolonFix implements IntentionAction, LocalQuickFix {
       return;
     }
 
+    Document document = PsiDocumentManager.getInstance(project).getDocument(file);
+    if (document == null) {
+      return;
+    }
+
     int offset = editor.getCaretModel().getOffset();
-    PsiElement elementAtCaret = file.findElementAt(offset);
-    if (elementAtCaret == null) {
-      return;
+    int lineNumber = document.getLineNumber(offset);
+    int lineEnd = document.getLineEndOffset(lineNumber);
+
+    // Find the end of meaningful text on this line (before trailing whitespace)
+    String lineText =
+        document.getText(
+            new com.intellij.openapi.util.TextRange(
+                document.getLineStartOffset(lineNumber), lineEnd));
+    int trimmedLength = lineText.length();
+    while (trimmedLength > 0 && Character.isWhitespace(lineText.charAt(trimmedLength - 1))) {
+      trimmedLength--;
     }
 
-    DroolsJavaStatement statement =
-        PsiTreeUtil.getParentOfType(elementAtCaret, DroolsJavaStatement.class, false);
-    if (statement == null) {
-      return;
-    }
+    int insertOffset = document.getLineStartOffset(lineNumber) + trimmedLength;
 
-    insertSemicolon(project, file, statement);
+    PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(document);
+    document.insertString(insertOffset, ";");
+    PsiDocumentManager.getInstance(project).commitDocument(document);
   }
 
   @Override
@@ -71,40 +80,21 @@ public class AddSemicolonFix implements IntentionAction, LocalQuickFix {
       return;
     }
 
-    // The descriptor element might be the statement itself or a child of it
-    DroolsJavaStatement statement;
-    if (element instanceof DroolsJavaStatement drlJavaStatement) {
-      statement = drlJavaStatement;
-    } else {
-      statement = PsiTreeUtil.getParentOfType(element, DroolsJavaStatement.class, false);
-    }
-
-    if (statement == null) {
-      return;
-    }
-
     PsiFile file = element.getContainingFile();
-    insertSemicolon(project, file, statement);
-  }
-
-  private void insertSemicolon(
-      @NotNull Project project, @NotNull PsiFile file, @NotNull DroolsJavaStatement statement) {
     Document document = PsiDocumentManager.getInstance(project).getDocument(file);
     if (document == null) {
       return;
     }
 
-    // Find the end of the meaningful text in the statement (before trailing whitespace)
-    // int endOffset = statement.getTextRange().getEndOffset();-
-    String text = statement.getText();
-
-    // Trim trailing whitespace to find where to insert the semicolon
+    // Insert semicolon at the end of the element's text
+    int endOffset = element.getTextRange().getEndOffset();
+    String text = element.getText();
     int trimmedLength = text.length();
     while (trimmedLength > 0 && Character.isWhitespace(text.charAt(trimmedLength - 1))) {
       trimmedLength--;
     }
 
-    int insertOffset = statement.getTextRange().getStartOffset() + trimmedLength;
+    int insertOffset = element.getTextRange().getStartOffset() + trimmedLength;
 
     PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(document);
     document.insertString(insertOffset, ";");

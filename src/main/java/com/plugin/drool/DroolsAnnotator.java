@@ -9,7 +9,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.plugin.drool.fixes.AddImportFix;
-import com.plugin.drool.fixes.AddSemicolonFix;
 import com.plugin.drool.fixes.RemoveBindingFix;
 import com.plugin.drool.fixes.RemoveUnusedImportFix;
 import com.plugin.drool.fixes.RenameDuplicateRuleFix;
@@ -28,7 +27,6 @@ import com.plugin.drool.psi.DroolsFunctionDef;
 import com.plugin.drool.psi.DroolsGlobalDecl;
 import com.plugin.drool.psi.DroolsImportPath;
 import com.plugin.drool.psi.DroolsImportStatement;
-import com.plugin.drool.psi.DroolsJavaStatement;
 import com.plugin.drool.psi.DroolsRuleAttribute;
 import com.plugin.drool.psi.DroolsRuleAttributes;
 import com.plugin.drool.psi.DroolsRuleBlock;
@@ -535,64 +533,46 @@ public class DroolsAnnotator implements Annotator {
   // ========== Java Syntax Validation in Then-Clause ==========
 
   /**
-   * Validates Java syntax in then-clause statements. Checks for missing semicolons and unbalanced
-   * braces.
+   * Validates Java syntax in then-clause content. Checks for unbalanced braces in the overall
+   * then-clause text.
    */
   private void validateJavaSyntax(
       @NotNull DroolsThenClause thenClause, @NotNull AnnotationHolder holder) {
-    List<DroolsJavaStatement> statements = thenClause.getJavaStatementList();
-    for (DroolsJavaStatement statement : statements) {
-      validateStatementSemicolon(statement, holder);
-      validateStatementBraces(statement, holder);
+    String thenText = thenClause.getText();
+    if (thenText == null || thenText.isEmpty()) {
+      return;
     }
+
+    // Strip the 'then' keyword prefix to get just the content
+    int thenKeywordEnd = thenText.indexOf("then");
+    if (thenKeywordEnd >= 0) {
+      thenText = thenText.substring(thenKeywordEnd + 4);
+    }
+
+    // Validate balanced braces in the then-clause content
+    validateThenClauseBraces(thenClause, thenText, holder);
   }
 
-  private void validateStatementSemicolon(
-      @NotNull DroolsJavaStatement statement, @NotNull AnnotationHolder holder) {
-    String text = statement.getText().trim();
-    if (text.isEmpty()) {
-      return;
-    }
-
-    // Skip comments, blank lines, and block statements (ending with })
-    if (text.startsWith("//") || text.startsWith("/*") || text.endsWith("}")) {
-      return;
-    }
-
-    // Skip modify blocks: modify($var) { ... }-
-    if (text.contains("modify") && text.contains("{")) {
-      return;
-    }
-
-    // A Java statement should end with a semicolon
-    if (!text.endsWith(";") && !text.endsWith("{") && text.length() > 3) {
-      holder
-          .newAnnotation(HighlightSeverity.ERROR, "Missing semicolon at end of statement")
-          .range(statement)
-          .withFix(new AddSemicolonFix())
-          .create();
-    }
-  }
-
-  private void validateStatementBraces(
-      @NotNull DroolsJavaStatement statement, @NotNull AnnotationHolder holder) {
-    String text = statement.getText();
+  private void validateThenClauseBraces(
+      @NotNull DroolsThenClause thenClause,
+      @NotNull String text,
+      @NotNull AnnotationHolder holder) {
     int depth = 0;
     for (char c : text.toCharArray()) {
       if (c == '{') depth++;
       else if (c == '}') depth--;
       if (depth < 0) {
         holder
-            .newAnnotation(HighlightSeverity.ERROR, "Unbalanced braces in statement")
-            .range(statement)
+            .newAnnotation(HighlightSeverity.ERROR, "Unbalanced braces in then-clause")
+            .range(thenClause)
             .create();
         return;
       }
     }
     if (depth != 0) {
       holder
-          .newAnnotation(HighlightSeverity.ERROR, "Unbalanced braces in statement")
-          .range(statement)
+          .newAnnotation(HighlightSeverity.ERROR, "Unbalanced braces in then-clause")
+          .range(thenClause)
           .create();
     }
   }

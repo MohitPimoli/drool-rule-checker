@@ -43,7 +43,6 @@ public interface DroolsTypes {
   IElementType GLOBAL_DECL = new DroolsElementType("GLOBAL_DECL");
   IElementType IMPORT_PATH = new DroolsElementType("IMPORT_PATH");
   IElementType IMPORT_STATEMENT = new DroolsElementType("IMPORT_STATEMENT");
-  IElementType JAVA_STATEMENT = new DroolsElementType("JAVA_STATEMENT");
   IElementType LITERAL = new DroolsElementType("LITERAL");
   IElementType LOCK_ON_ACTIVE_ATTRIBUTE = new DroolsElementType("LOCK_ON_ACTIVE_ATTRIBUTE");
   IElementType LOGICAL_CONNECTIVE = new DroolsElementType("LOGICAL_CONNECTIVE");
@@ -64,6 +63,7 @@ public interface DroolsTypes {
   IElementType RULE_NAME = new DroolsElementType("RULE_NAME");
   IElementType SALIENCE_ATTRIBUTE = new DroolsElementType("SALIENCE_ATTRIBUTE");
   IElementType THEN_CLAUSE = new DroolsElementType("THEN_CLAUSE");
+  IElementType THEN_CONTENT = new DroolsElementType("THEN_CONTENT");
   IElementType TIMER_ATTRIBUTE = new DroolsElementType("TIMER_ATTRIBUTE");
   IElementType TYPE_ARGUMENTS = new DroolsElementType("TYPE_ARGUMENTS");
   IElementType TYPE_NAME = new DroolsElementType("TYPE_NAME");
@@ -246,9 +246,6 @@ public interface DroolsTypes {
       else if (type == IMPORT_STATEMENT) {
         return new DroolsImportStatementImpl(node);
       }
-      else if (type == JAVA_STATEMENT) {
-        return new DroolsJavaStatementImpl(node);
-      }
       else if (type == LITERAL) {
         return new DroolsLiteralImpl(node);
       }
@@ -308,6 +305,9 @@ public interface DroolsTypes {
       }
       else if (type == THEN_CLAUSE) {
         return new DroolsThenClauseImpl(node);
+      }
+      else if (type == THEN_CONTENT) {
+        return new DroolsThenContentImpl(node);
       }
       else if (type == TIMER_ATTRIBUTE) {
         return new DroolsTimerAttributeImpl(node);

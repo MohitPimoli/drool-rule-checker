@@ -11,14 +11,14 @@ import static com.plugin.drool.psi.DroolsTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.plugin.drool.psi.*;
 
-public class DroolsJavaStatementImpl extends ASTWrapperPsiElement implements DroolsJavaStatement {
+public class DroolsThenContentImpl extends ASTWrapperPsiElement implements DroolsThenContent {
 
-  public DroolsJavaStatementImpl(@NotNull ASTNode node) {
+  public DroolsThenContentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull DroolsVisitor visitor) {
-    visitor.visitJavaStatement(this);
+    visitor.visitThenContent(this);
   }
 
   @Override
@@ -29,14 +29,8 @@ public class DroolsJavaStatementImpl extends ASTWrapperPsiElement implements Dro
 
   @Override
   @NotNull
-  public List<DroolsBlockContent> getBlockContentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, DroolsBlockContent.class);
-  }
-
-  @Override
-  @NotNull
-  public List<DroolsExpressionContent> getExpressionContentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, DroolsExpressionContent.class);
+  public List<DroolsThenContent> getThenContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, DroolsThenContent.class);
   }
 
 }

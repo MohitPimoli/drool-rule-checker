@@ -147,10 +147,6 @@ public class DroolsVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitJavaStatement(@NotNull DroolsJavaStatement o) {
-    visitPsiElement(o);
-  }
-
   public void visitLiteral(@NotNull DroolsLiteral o) {
     visitPsiElement(o);
   }
@@ -228,6 +224,10 @@ public class DroolsVisitor extends PsiElementVisitor {
   }
 
   public void visitThenClause(@NotNull DroolsThenClause o) {
+    visitPsiElement(o);
+  }
+
+  public void visitThenContent(@NotNull DroolsThenContent o) {
     visitPsiElement(o);
   }
 

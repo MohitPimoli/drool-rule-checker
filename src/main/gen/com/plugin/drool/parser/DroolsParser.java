@@ -1581,58 +1581,6 @@ public class DroolsParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // javaStatementContent SEMICOLON
-  public static boolean javaStatement(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "javaStatement")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, JAVA_STATEMENT, "<java statement>");
-    result_ = javaStatementContent(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, SEMICOLON);
-    exit_section_(builder_, level_, marker_, result_, false, DroolsParser::javaStatementRecover);
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // statementToken+
-  static boolean javaStatementContent(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "javaStatementContent")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = statementToken(builder_, level_ + 1);
-    while (result_) {
-      int pos_ = current_position_(builder_);
-      if (!statementToken(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "javaStatementContent", pos_)) break;
-    }
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // !(SEMICOLON | END_KEYWORD | RULE_KEYWORD | <<eof>>)
-  static boolean javaStatementRecover(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "javaStatementRecover")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_);
-    result_ = !javaStatementRecover_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, false, null);
-    return result_;
-  }
-
-  // SEMICOLON | END_KEYWORD | RULE_KEYWORD | <<eof>>
-  private static boolean javaStatementRecover_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "javaStatementRecover_0")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, SEMICOLON);
-    if (!result_) result_ = consumeToken(builder_, END_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, RULE_KEYWORD);
-    if (!result_) result_ = eof(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  /* ********************************************************** */
   // NUMBER | STRING | TRUE_KEYWORD | FALSE_KEYWORD | NULL_KEYWORD
   public static boolean literal(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal")) return false;
@@ -2278,106 +2226,7 @@ public class DroolsParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR
-  //                           | LEFT_PAREN expressionContent? RIGHT_PAREN
-  //                           | LEFT_BRACE blockContent? RIGHT_BRACE
-  //                           | LEFT_BRACKET expressionContent? RIGHT_BRACKET
-  //                           | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
-  //                           | IF_KEYWORD | ELSE_KEYWORD | RETURN_KEYWORD
-  //                           | INSERT_KEYWORD | INSERT_LOGICAL_KEYWORD | UPDATE_KEYWORD
-  //                           | MODIFY_KEYWORD | RETRACT_KEYWORD | DELETE_KEYWORD
-  static boolean statementToken(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, IDENTIFIER);
-    if (!result_) result_ = consumeToken(builder_, NUMBER);
-    if (!result_) result_ = consumeToken(builder_, STRING);
-    if (!result_) result_ = consumeToken(builder_, OPERATOR);
-    if (!result_) result_ = consumeToken(builder_, DOT);
-    if (!result_) result_ = consumeToken(builder_, COMMA);
-    if (!result_) result_ = consumeToken(builder_, COLON);
-    if (!result_) result_ = consumeToken(builder_, DOLLAR);
-    if (!result_) result_ = statementToken_8(builder_, level_ + 1);
-    if (!result_) result_ = statementToken_9(builder_, level_ + 1);
-    if (!result_) result_ = statementToken_10(builder_, level_ + 1);
-    if (!result_) result_ = consumeToken(builder_, NEW_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, NULL_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, TRUE_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, FALSE_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, THIS_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, IF_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, ELSE_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, RETURN_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, INSERT_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, INSERT_LOGICAL_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, UPDATE_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, MODIFY_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, RETRACT_KEYWORD);
-    if (!result_) result_ = consumeToken(builder_, DELETE_KEYWORD);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // LEFT_PAREN expressionContent? RIGHT_PAREN
-  private static boolean statementToken_8(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_8")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, LEFT_PAREN);
-    result_ = result_ && statementToken_8_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, RIGHT_PAREN);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // expressionContent?
-  private static boolean statementToken_8_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_8_1")) return false;
-    expressionContent(builder_, level_ + 1);
-    return true;
-  }
-
-  // LEFT_BRACE blockContent? RIGHT_BRACE
-  private static boolean statementToken_9(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_9")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, LEFT_BRACE);
-    result_ = result_ && statementToken_9_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, RIGHT_BRACE);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // blockContent?
-  private static boolean statementToken_9_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_9_1")) return false;
-    blockContent(builder_, level_ + 1);
-    return true;
-  }
-
-  // LEFT_BRACKET expressionContent? RIGHT_BRACKET
-  private static boolean statementToken_10(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_10")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, LEFT_BRACKET);
-    result_ = result_ && statementToken_10_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, RIGHT_BRACKET);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // expressionContent?
-  private static boolean statementToken_10_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "statementToken_10_1")) return false;
-    expressionContent(builder_, level_ + 1);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // THEN_KEYWORD javaStatement*
+  // THEN_KEYWORD thenContent?
   public static boolean thenClause(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "thenClause")) return false;
     boolean result_, pinned_;
@@ -2389,14 +2238,10 @@ public class DroolsParser implements PsiParser, LightPsiParser {
     return result_ || pinned_;
   }
 
-  // javaStatement*
+  // thenContent?
   private static boolean thenClause_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "thenClause_1")) return false;
-    while (true) {
-      int pos_ = current_position_(builder_);
-      if (!javaStatement(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "thenClause_1", pos_)) break;
-    }
+    thenContent(builder_, level_ + 1);
     return true;
   }
 
@@ -2421,6 +2266,144 @@ public class DroolsParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = eof(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
+  }
+
+  /* ********************************************************** */
+  // thenToken+
+  public static boolean thenContent(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenContent")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, THEN_CONTENT, "<then content>");
+    result_ = thenToken(builder_, level_ + 1);
+    while (result_) {
+      int pos_ = current_position_(builder_);
+      if (!thenToken(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "thenContent", pos_)) break;
+    }
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER | NUMBER | STRING | OPERATOR | DOT | COMMA | COLON | DOLLAR | SEMICOLON
+  //                      | LEFT_PAREN thenContent? RIGHT_PAREN
+  //                      | LEFT_BRACE thenContent? RIGHT_BRACE
+  //                      | LEFT_BRACKET thenContent? RIGHT_BRACKET
+  //                      | NEW_KEYWORD | NULL_KEYWORD | TRUE_KEYWORD | FALSE_KEYWORD | THIS_KEYWORD
+  //                      | IF_KEYWORD | ELSE_KEYWORD | RETURN_KEYWORD
+  //                      | INSERT_KEYWORD | INSERT_LOGICAL_KEYWORD | UPDATE_KEYWORD
+  //                      | MODIFY_KEYWORD | RETRACT_KEYWORD | DELETE_KEYWORD
+  //                      | NOT_KEYWORD | AND_KEYWORD | OR_KEYWORD | FROM_KEYWORD
+  //                      | MATCHES_KEYWORD | CONTAINS_KEYWORD | MEMBER_OF_KEYWORD
+  //                      | IN_KEYWORD | EVAL_KEYWORD | COLLECT_KEYWORD | ACCUMULATE_KEYWORD
+  //                      | IMPORT_KEYWORD | GLOBAL_KEYWORD | FUNCTION_KEYWORD
+  //                      | EXTENDS_KEYWORD | FORALL_KEYWORD | EXISTS_KEYWORD
+  static boolean thenToken(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, IDENTIFIER);
+    if (!result_) result_ = consumeToken(builder_, NUMBER);
+    if (!result_) result_ = consumeToken(builder_, STRING);
+    if (!result_) result_ = consumeToken(builder_, OPERATOR);
+    if (!result_) result_ = consumeToken(builder_, DOT);
+    if (!result_) result_ = consumeToken(builder_, COMMA);
+    if (!result_) result_ = consumeToken(builder_, COLON);
+    if (!result_) result_ = consumeToken(builder_, DOLLAR);
+    if (!result_) result_ = consumeToken(builder_, SEMICOLON);
+    if (!result_) result_ = thenToken_9(builder_, level_ + 1);
+    if (!result_) result_ = thenToken_10(builder_, level_ + 1);
+    if (!result_) result_ = thenToken_11(builder_, level_ + 1);
+    if (!result_) result_ = consumeToken(builder_, NEW_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, NULL_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, TRUE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, FALSE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, THIS_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, IF_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, ELSE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, RETURN_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, INSERT_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, INSERT_LOGICAL_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, UPDATE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, MODIFY_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, RETRACT_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, DELETE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, NOT_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, AND_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, OR_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, FROM_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, MATCHES_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, CONTAINS_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, MEMBER_OF_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, IN_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, EVAL_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, COLLECT_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, ACCUMULATE_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, IMPORT_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, GLOBAL_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, FUNCTION_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, EXTENDS_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, FORALL_KEYWORD);
+    if (!result_) result_ = consumeToken(builder_, EXISTS_KEYWORD);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // LEFT_PAREN thenContent? RIGHT_PAREN
+  private static boolean thenToken_9(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_9")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, LEFT_PAREN);
+    result_ = result_ && thenToken_9_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, RIGHT_PAREN);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // thenContent?
+  private static boolean thenToken_9_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_9_1")) return false;
+    thenContent(builder_, level_ + 1);
+    return true;
+  }
+
+  // LEFT_BRACE thenContent? RIGHT_BRACE
+  private static boolean thenToken_10(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_10")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, LEFT_BRACE);
+    result_ = result_ && thenToken_10_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, RIGHT_BRACE);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // thenContent?
+  private static boolean thenToken_10_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_10_1")) return false;
+    thenContent(builder_, level_ + 1);
+    return true;
+  }
+
+  // LEFT_BRACKET thenContent? RIGHT_BRACKET
+  private static boolean thenToken_11(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_11")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, LEFT_BRACKET);
+    result_ = result_ && thenToken_11_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, RIGHT_BRACKET);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // thenContent?
+  private static boolean thenToken_11_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "thenToken_11_1")) return false;
+    thenContent(builder_, level_ + 1);
+    return true;
   }
 
   /* ********************************************************** */

@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface DroolsThenClause extends PsiElement {
 
-  @NotNull
-  List<DroolsJavaStatement> getJavaStatementList();
+  @Nullable
+  DroolsThenContent getThenContent();
 
 }

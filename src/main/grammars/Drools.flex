@@ -14,12 +14,7 @@ import com.plugin.drool.psi.DroolsTypes;
 %function advance
 %type IElementType
 
-%state STRING
 %state BLOCK_COMMENT
-
-%{
-  private StringBuilder stringBuilder = new StringBuilder();
-%}
 
 // Helpers
 LineTerminator = \r|\n|\r\n
@@ -53,8 +48,11 @@ SingleLineComment = "//" [^\r\n]*
   // Multi-line comment start
   "/*"                               { yybegin(BLOCK_COMMENT); return DroolsTypes.COMMENT; }
 
-  // String literal start
-  \"                                 { yybegin(STRING); return DroolsTypes.STRING; }
+  // Complete string literal (single line)
+  \"([^\"\\\r\n]|\\.)*\"            { return DroolsTypes.STRING; }
+
+  // Unterminated string (no closing quote before end of line) - still return as STRING for error recovery
+  \"([^\"\\\r\n]|\\.)*              { return DroolsTypes.STRING; }
 
   // Drools keywords - core structure
   "rule"                             { return DroolsTypes.RULE_KEYWORD; }
@@ -120,10 +118,7 @@ SingleLineComment = "//" [^\r\n]*
   "return"                           { return DroolsTypes.RETURN_KEYWORD; }
   "this"                             { return DroolsTypes.THIS_KEYWORD; }
 
-  // Binding variable prefix ($identifier)
-  "$"{Identifier}                    { return DroolsTypes.IDENTIFIER; }
-
-  // Dollar sign alone
+  // Dollar sign
   "$"                                { return DroolsTypes.DOLLAR; }
 
   // Identifiers (must come after keywords)
@@ -177,31 +172,6 @@ SingleLineComment = "//" [^\r\n]*
 
   // Any other character is a bad character
   [^]                                { return TokenType.BAD_CHARACTER; }
-}
-
-<STRING> {
-  // End of string
-  \"                                 { yybegin(YYINITIAL); return DroolsTypes.STRING; }
-
-  // Escape sequences
-  \\\"                               { return DroolsTypes.STRING; }
-  \\\\                               { return DroolsTypes.STRING; }
-  \\n                                { return DroolsTypes.STRING; }
-  \\r                                { return DroolsTypes.STRING; }
-  \\t                                { return DroolsTypes.STRING; }
-  \\b                                { return DroolsTypes.STRING; }
-  \\f                                { return DroolsTypes.STRING; }
-  \\[0-3]?[0-7]{1,2}                { return DroolsTypes.STRING; }
-  \\u[0-9a-fA-F]{4}                 { return DroolsTypes.STRING; }
-
-  // Any other escape (invalid but still part of string)
-  \\.                                { return DroolsTypes.STRING; }
-
-  // String content (anything except quote, backslash, or newline)
-  [^\"\\\r\n]+                       { return DroolsTypes.STRING; }
-
-  // Unterminated string at end of line
-  {LineTerminator}                   { yybegin(YYINITIAL); return TokenType.BAD_CHARACTER; }
 }
 
 <BLOCK_COMMENT> {
