@@ -1,10 +1,69 @@
 // This is a generated file. Not intended for manual editing.
 package com.plugin.drool.psi;
 
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
-import com.plugin.drool.psi.impl.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
+import com.plugin.drool.psi.impl.DroolsAccumElementImpl;
+import com.plugin.drool.psi.impl.DroolsAccumulateFunctionImpl;
+import com.plugin.drool.psi.impl.DroolsAgendaGroupAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsArrayBracketsImpl;
+import com.plugin.drool.psi.impl.DroolsAttributeValueImpl;
+import com.plugin.drool.psi.impl.DroolsAutoFocusAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsBindingPatternImpl;
+import com.plugin.drool.psi.impl.DroolsBindingVariableImpl;
+import com.plugin.drool.psi.impl.DroolsBlockContentImpl;
+import com.plugin.drool.psi.impl.DroolsClassNameImpl;
+import com.plugin.drool.psi.impl.DroolsConditionalElementImpl;
+import com.plugin.drool.psi.impl.DroolsConstraintExprImpl;
+import com.plugin.drool.psi.impl.DroolsConstraintListImpl;
+import com.plugin.drool.psi.impl.DroolsConstraintOperatorImpl;
+import com.plugin.drool.psi.impl.DroolsDateEffectiveAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsDateExpiresAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsDeclareBlockImpl;
+import com.plugin.drool.psi.impl.DroolsDeclareExtendsImpl;
+import com.plugin.drool.psi.impl.DroolsDeclareFieldImpl;
+import com.plugin.drool.psi.impl.DroolsDialectAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsDurationAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsEnabledAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsEvalElementImpl;
+import com.plugin.drool.psi.impl.DroolsExistsElementImpl;
+import com.plugin.drool.psi.impl.DroolsExpressionContentImpl;
+import com.plugin.drool.psi.impl.DroolsExpressionImpl;
+import com.plugin.drool.psi.impl.DroolsExtendsAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsFactPatternImpl;
+import com.plugin.drool.psi.impl.DroolsForallElementImpl;
+import com.plugin.drool.psi.impl.DroolsFromElementImpl;
+import com.plugin.drool.psi.impl.DroolsFunctionBodyImpl;
+import com.plugin.drool.psi.impl.DroolsFunctionDefImpl;
+import com.plugin.drool.psi.impl.DroolsGlobalDeclImpl;
+import com.plugin.drool.psi.impl.DroolsImportPathImpl;
+import com.plugin.drool.psi.impl.DroolsImportStatementImpl;
+import com.plugin.drool.psi.impl.DroolsJavaStatementImpl;
+import com.plugin.drool.psi.impl.DroolsLiteralImpl;
+import com.plugin.drool.psi.impl.DroolsLockOnActiveAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsLogicalConnectiveImpl;
+import com.plugin.drool.psi.impl.DroolsNoLoopAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsNotElementImpl;
+import com.plugin.drool.psi.impl.DroolsPackageDeclImpl;
+import com.plugin.drool.psi.impl.DroolsParameterImpl;
+import com.plugin.drool.psi.impl.DroolsParameterListImpl;
+import com.plugin.drool.psi.impl.DroolsPatternImpl;
+import com.plugin.drool.psi.impl.DroolsQualifiedNameImpl;
+import com.plugin.drool.psi.impl.DroolsQueryDefImpl;
+import com.plugin.drool.psi.impl.DroolsQueryNameImpl;
+import com.plugin.drool.psi.impl.DroolsQueryParamsImpl;
+import com.plugin.drool.psi.impl.DroolsRuleAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsRuleAttributesImpl;
+import com.plugin.drool.psi.impl.DroolsRuleBlockImpl;
+import com.plugin.drool.psi.impl.DroolsRuleNameImpl;
+import com.plugin.drool.psi.impl.DroolsRuleflowGroupAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsSalienceAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsThenClauseImpl;
+import com.plugin.drool.psi.impl.DroolsTimerAttributeImpl;
+import com.plugin.drool.psi.impl.DroolsTypeArgumentsImpl;
+import com.plugin.drool.psi.impl.DroolsTypeNameImpl;
+import com.plugin.drool.psi.impl.DroolsWhenClauseImpl;
 
 public interface DroolsTypes {
 
@@ -68,7 +127,6 @@ public interface DroolsTypes {
   IElementType TYPE_ARGUMENTS = new DroolsElementType("TYPE_ARGUMENTS");
   IElementType TYPE_NAME = new DroolsElementType("TYPE_NAME");
   IElementType WHEN_CLAUSE = new DroolsElementType("WHEN_CLAUSE");
-
   IElementType ACCUMULATE_KEYWORD = new DroolsTokenType("accumulate");
   IElementType AGENDA_GROUP_KEYWORD = new DroolsTokenType("agenda-group");
   IElementType AND_KEYWORD = new DroolsTokenType("and");
@@ -139,186 +197,129 @@ public interface DroolsTypes {
   IElementType WHEN_KEYWORD = new DroolsTokenType("when");
 
   class Factory {
+    private Factory() {}
+
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
       if (type == ACCUMULATE_FUNCTION) {
         return new DroolsAccumulateFunctionImpl(node);
-      }
-      else if (type == ACCUM_ELEMENT) {
+      } else if (type == ACCUM_ELEMENT) {
         return new DroolsAccumElementImpl(node);
-      }
-      else if (type == AGENDA_GROUP_ATTRIBUTE) {
+      } else if (type == AGENDA_GROUP_ATTRIBUTE) {
         return new DroolsAgendaGroupAttributeImpl(node);
-      }
-      else if (type == ARRAY_BRACKETS) {
+      } else if (type == ARRAY_BRACKETS) {
         return new DroolsArrayBracketsImpl(node);
-      }
-      else if (type == ATTRIBUTE_VALUE) {
+      } else if (type == ATTRIBUTE_VALUE) {
         return new DroolsAttributeValueImpl(node);
-      }
-      else if (type == AUTO_FOCUS_ATTRIBUTE) {
+      } else if (type == AUTO_FOCUS_ATTRIBUTE) {
         return new DroolsAutoFocusAttributeImpl(node);
-      }
-      else if (type == BINDING_PATTERN) {
+      } else if (type == BINDING_PATTERN) {
         return new DroolsBindingPatternImpl(node);
-      }
-      else if (type == BINDING_VARIABLE) {
+      } else if (type == BINDING_VARIABLE) {
         return new DroolsBindingVariableImpl(node);
-      }
-      else if (type == BLOCK_CONTENT) {
+      } else if (type == BLOCK_CONTENT) {
         return new DroolsBlockContentImpl(node);
-      }
-      else if (type == CLASS_NAME) {
+      } else if (type == CLASS_NAME) {
         return new DroolsClassNameImpl(node);
-      }
-      else if (type == CONDITIONAL_ELEMENT) {
+      } else if (type == CONDITIONAL_ELEMENT) {
         return new DroolsConditionalElementImpl(node);
-      }
-      else if (type == CONSTRAINT_EXPR) {
+      } else if (type == CONSTRAINT_EXPR) {
         return new DroolsConstraintExprImpl(node);
-      }
-      else if (type == CONSTRAINT_LIST) {
+      } else if (type == CONSTRAINT_LIST) {
         return new DroolsConstraintListImpl(node);
-      }
-      else if (type == CONSTRAINT_OPERATOR) {
+      } else if (type == CONSTRAINT_OPERATOR) {
         return new DroolsConstraintOperatorImpl(node);
-      }
-      else if (type == DATE_EFFECTIVE_ATTRIBUTE) {
+      } else if (type == DATE_EFFECTIVE_ATTRIBUTE) {
         return new DroolsDateEffectiveAttributeImpl(node);
-      }
-      else if (type == DATE_EXPIRES_ATTRIBUTE) {
+      } else if (type == DATE_EXPIRES_ATTRIBUTE) {
         return new DroolsDateExpiresAttributeImpl(node);
-      }
-      else if (type == DECLARE_BLOCK) {
+      } else if (type == DECLARE_BLOCK) {
         return new DroolsDeclareBlockImpl(node);
-      }
-      else if (type == DECLARE_EXTENDS) {
+      } else if (type == DECLARE_EXTENDS) {
         return new DroolsDeclareExtendsImpl(node);
-      }
-      else if (type == DECLARE_FIELD) {
+      } else if (type == DECLARE_FIELD) {
         return new DroolsDeclareFieldImpl(node);
-      }
-      else if (type == DIALECT_ATTRIBUTE) {
+      } else if (type == DIALECT_ATTRIBUTE) {
         return new DroolsDialectAttributeImpl(node);
-      }
-      else if (type == DURATION_ATTRIBUTE) {
+      } else if (type == DURATION_ATTRIBUTE) {
         return new DroolsDurationAttributeImpl(node);
-      }
-      else if (type == ENABLED_ATTRIBUTE) {
+      } else if (type == ENABLED_ATTRIBUTE) {
         return new DroolsEnabledAttributeImpl(node);
-      }
-      else if (type == EVAL_ELEMENT) {
+      } else if (type == EVAL_ELEMENT) {
         return new DroolsEvalElementImpl(node);
-      }
-      else if (type == EXISTS_ELEMENT) {
+      } else if (type == EXISTS_ELEMENT) {
         return new DroolsExistsElementImpl(node);
-      }
-      else if (type == EXPRESSION) {
+      } else if (type == EXPRESSION) {
         return new DroolsExpressionImpl(node);
-      }
-      else if (type == EXPRESSION_CONTENT) {
+      } else if (type == EXPRESSION_CONTENT) {
         return new DroolsExpressionContentImpl(node);
-      }
-      else if (type == EXTENDS_ATTRIBUTE) {
+      } else if (type == EXTENDS_ATTRIBUTE) {
         return new DroolsExtendsAttributeImpl(node);
-      }
-      else if (type == FACT_PATTERN) {
+      } else if (type == FACT_PATTERN) {
         return new DroolsFactPatternImpl(node);
-      }
-      else if (type == FORALL_ELEMENT) {
+      } else if (type == FORALL_ELEMENT) {
         return new DroolsForallElementImpl(node);
-      }
-      else if (type == FROM_ELEMENT) {
+      } else if (type == FROM_ELEMENT) {
         return new DroolsFromElementImpl(node);
-      }
-      else if (type == FUNCTION_BODY) {
+      } else if (type == FUNCTION_BODY) {
         return new DroolsFunctionBodyImpl(node);
-      }
-      else if (type == FUNCTION_DEF) {
+      } else if (type == FUNCTION_DEF) {
         return new DroolsFunctionDefImpl(node);
-      }
-      else if (type == GLOBAL_DECL) {
+      } else if (type == GLOBAL_DECL) {
         return new DroolsGlobalDeclImpl(node);
-      }
-      else if (type == IMPORT_PATH) {
+      } else if (type == IMPORT_PATH) {
         return new DroolsImportPathImpl(node);
-      }
-      else if (type == IMPORT_STATEMENT) {
+      } else if (type == IMPORT_STATEMENT) {
         return new DroolsImportStatementImpl(node);
-      }
-      else if (type == JAVA_STATEMENT) {
+      } else if (type == JAVA_STATEMENT) {
         return new DroolsJavaStatementImpl(node);
-      }
-      else if (type == LITERAL) {
+      } else if (type == LITERAL) {
         return new DroolsLiteralImpl(node);
-      }
-      else if (type == LOCK_ON_ACTIVE_ATTRIBUTE) {
+      } else if (type == LOCK_ON_ACTIVE_ATTRIBUTE) {
         return new DroolsLockOnActiveAttributeImpl(node);
-      }
-      else if (type == LOGICAL_CONNECTIVE) {
+      } else if (type == LOGICAL_CONNECTIVE) {
         return new DroolsLogicalConnectiveImpl(node);
-      }
-      else if (type == NOT_ELEMENT) {
+      } else if (type == NOT_ELEMENT) {
         return new DroolsNotElementImpl(node);
-      }
-      else if (type == NO_LOOP_ATTRIBUTE) {
+      } else if (type == NO_LOOP_ATTRIBUTE) {
         return new DroolsNoLoopAttributeImpl(node);
-      }
-      else if (type == PACKAGE_DECL) {
+      } else if (type == PACKAGE_DECL) {
         return new DroolsPackageDeclImpl(node);
-      }
-      else if (type == PARAMETER) {
+      } else if (type == PARAMETER) {
         return new DroolsParameterImpl(node);
-      }
-      else if (type == PARAMETER_LIST) {
+      } else if (type == PARAMETER_LIST) {
         return new DroolsParameterListImpl(node);
-      }
-      else if (type == PATTERN) {
+      } else if (type == PATTERN) {
         return new DroolsPatternImpl(node);
-      }
-      else if (type == QUALIFIED_NAME) {
+      } else if (type == QUALIFIED_NAME) {
         return new DroolsQualifiedNameImpl(node);
-      }
-      else if (type == QUERY_DEF) {
+      } else if (type == QUERY_DEF) {
         return new DroolsQueryDefImpl(node);
-      }
-      else if (type == QUERY_NAME) {
+      } else if (type == QUERY_NAME) {
         return new DroolsQueryNameImpl(node);
-      }
-      else if (type == QUERY_PARAMS) {
+      } else if (type == QUERY_PARAMS) {
         return new DroolsQueryParamsImpl(node);
-      }
-      else if (type == RULEFLOW_GROUP_ATTRIBUTE) {
+      } else if (type == RULEFLOW_GROUP_ATTRIBUTE) {
         return new DroolsRuleflowGroupAttributeImpl(node);
-      }
-      else if (type == RULE_ATTRIBUTE) {
+      } else if (type == RULE_ATTRIBUTE) {
         return new DroolsRuleAttributeImpl(node);
-      }
-      else if (type == RULE_ATTRIBUTES) {
+      } else if (type == RULE_ATTRIBUTES) {
         return new DroolsRuleAttributesImpl(node);
-      }
-      else if (type == RULE_BLOCK) {
+      } else if (type == RULE_BLOCK) {
         return new DroolsRuleBlockImpl(node);
-      }
-      else if (type == RULE_NAME) {
+      } else if (type == RULE_NAME) {
         return new DroolsRuleNameImpl(node);
-      }
-      else if (type == SALIENCE_ATTRIBUTE) {
+      } else if (type == SALIENCE_ATTRIBUTE) {
         return new DroolsSalienceAttributeImpl(node);
-      }
-      else if (type == THEN_CLAUSE) {
+      } else if (type == THEN_CLAUSE) {
         return new DroolsThenClauseImpl(node);
-      }
-      else if (type == TIMER_ATTRIBUTE) {
+      } else if (type == TIMER_ATTRIBUTE) {
         return new DroolsTimerAttributeImpl(node);
-      }
-      else if (type == TYPE_ARGUMENTS) {
+      } else if (type == TYPE_ARGUMENTS) {
         return new DroolsTypeArgumentsImpl(node);
-      }
-      else if (type == TYPE_NAME) {
+      } else if (type == TYPE_NAME) {
         return new DroolsTypeNameImpl(node);
-      }
-      else if (type == WHEN_CLAUSE) {
+      } else if (type == WHEN_CLAUSE) {
         return new DroolsWhenClauseImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
