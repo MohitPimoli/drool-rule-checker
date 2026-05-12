@@ -1,6 +1,5 @@
 # Drools Rule Checker — IntelliJ IDEA Plugin for DRL Files
 
-[![JetBrains Plugin](https://img.shields.io/badge/JetBrains_Marketplace-Drools_Rule_Checker-orange.svg)](https://plugins.jetbrains.com/plugin/26requirement-drool-rule-checker)
 [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2024.2+-purple.svg)](https://www.jetbrains.com/idea/)
