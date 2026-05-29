@@ -26,7 +26,6 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiType;
-import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -48,6 +47,7 @@ import com.plugin.drool.psi.DroolsRuleBlock;
 import com.plugin.drool.psi.DroolsThenClause;
 import com.plugin.drool.psi.DroolsTypeName;
 import com.plugin.drool.psi.DroolsWhenClause;
+import com.plugin.drool.util.DotAccessExpressionResolver;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -480,14 +480,15 @@ public class DroolsCompletionContributor extends CompletionContributor {
       PsiElement position = parameters.getPosition();
       Project project = position.getProject();
 
-      // Find the text before the dot to determine the type
+      // Find the dot element preceding the cursor
       PsiElement dotElement = findPrecedingDot(position);
       if (dotElement == null) return;
 
-      PsiElement beforeDot = findExpressionBeforeDot(dotElement);
-      if (beforeDot == null) return;
+      // Use the shared helper to reconstruct the full expression before the dot
+      // This correctly handles $-prefixed bindings (DOLLAR + IDENTIFIER) and chained access
+      String precedingText = DotAccessExpressionResolver.reconstructExpressionBeforeDot(dotElement);
+      if (precedingText == null || precedingText.isEmpty()) return;
 
-      String precedingText = beforeDot.getText();
       PsiClass resolvedClass = resolveType(precedingText, position, project);
       if (resolvedClass == null) return;
 
@@ -541,42 +542,142 @@ public class DroolsCompletionContributor extends CompletionContributor {
       return null;
     }
 
-    private PsiElement findExpressionBeforeDot(PsiElement dot) {
-      PsiElement prev = dot.getPrevSibling();
-      while (prev instanceof PsiWhiteSpace) {
-        prev = prev.getPrevSibling();
-      }
-      return prev;
-    }
-
+    /**
+     * Resolves the type of the preceding expression text. Supports: - Simple $-binding: "$x" ->
+     * looks up binding, resolves to bound type - Chained access: "$x.member" -> resolves $x to its
+     * type, then resolves "member" as a property/field/getter return type on that class -
+     * Multi-level chain: "$x.a.b" -> resolves iteratively - Class name: "Integer" -> resolves to
+     * the class directly (for static access) - Non-$ identifier: "localVar" -> tries class
+     * resolution
+     */
     private PsiClass resolveType(String text, PsiElement context, Project project) {
       if (text == null || text.isEmpty()) return null;
 
-      // Strip $ prefix for binding variables
-      //      String lookupName = text.startsWith("$") ? text : text;-
+      // Handle $-prefixed expressions (bindings and chained access)
+      if (text.startsWith("$")) {
+        DroolsRuleBlock ruleBlock = PsiTreeUtil.getParentOfType(context, DroolsRuleBlock.class);
+        if (ruleBlock != null) {
+          return resolveBindingExpression(text, ruleBlock, context, project);
+        }
+        return null;
+      }
 
-      // Try to resolve as a binding variable first
-      DroolsRuleBlock ruleBlock = PsiTreeUtil.getParentOfType(context, DroolsRuleBlock.class);
-      if (ruleBlock != null && text.startsWith("$")) {
-        DroolsResolutionCache cache = DroolsResolutionCache.getInstance(project);
-        Map<String, DroolsBindingVariable> bindings = cache.getBindingsForRule(ruleBlock);
-        DroolsBindingVariable binding = bindings.get(text);
-        if (binding != null) {
-          // Get the type from the binding's fact pattern
-          PsiElement parent = binding.getParent();
-          if (parent instanceof DroolsBindingPattern bindingPattern) {
-            DroolsFactPattern factPattern =
-                PsiTreeUtil.getChildOfType(bindingPattern, DroolsFactPattern.class);
-            if (factPattern != null) {
-              String className = factPattern.getClassName().getText();
-              return resolveClassName(className, context, project);
-            }
+      // Try to resolve as a class name directly (for static access like Integer.)
+      return resolveClassName(text, context, project);
+    }
+
+    /**
+     * Resolves a $-prefixed expression, handling both simple bindings and chained member access.
+     * For "$x", resolves the binding to its bound type. For "$x.member", resolves $x first, then
+     * resolves "member" as a property/field/getter return type on the resolved class. For "$x.a.b",
+     * resolves iteratively through each segment.
+     */
+    private PsiClass resolveBindingExpression(
+        String text, DroolsRuleBlock ruleBlock, PsiElement context, Project project) {
+      // Split on dots to handle chained access: "$x.member.sub" -> ["$x", "member", "sub"]
+      String[] segments = text.split("\\.");
+      if (segments.length == 0) return null;
+
+      // First segment must be the $-binding variable name
+      String bindingName = segments[0]; // e.g. "$x" or "$alloyDbBackup"
+      DroolsResolutionCache cache = DroolsResolutionCache.getInstance(project);
+      Map<String, DroolsBindingVariable> bindings = cache.getBindingsForRule(ruleBlock);
+      DroolsBindingVariable binding = bindings.get(bindingName);
+      if (binding == null) return null;
+
+      // Resolve the binding to its bound type
+      PsiClass currentClass = resolveBindingToClass(binding, context, project);
+      if (currentClass == null) return null;
+
+      // If there are chained segments (e.g. "$x.member"), resolve each one iteratively
+      for (int i = 1; i < segments.length; i++) {
+        String memberName = segments[i];
+        currentClass = resolveMemberType(currentClass, memberName, context, project);
+        if (currentClass == null) return null;
+      }
+
+      return currentClass;
+    }
+
+    /** Resolves a binding variable to its bound PsiClass by looking at the fact pattern. */
+    private PsiClass resolveBindingToClass(
+        DroolsBindingVariable binding, PsiElement context, Project project) {
+      PsiElement parent = binding.getParent();
+      if (parent instanceof DroolsBindingPattern bindingPattern) {
+        DroolsFactPattern factPattern =
+            PsiTreeUtil.getChildOfType(bindingPattern, DroolsFactPattern.class);
+        if (factPattern != null) {
+          String className = factPattern.getClassName().getText();
+          return resolveClassName(className, context, project);
+        }
+      }
+      return null;
+    }
+
+    /**
+     * Resolves a member name (property/field/getter) on a given class to the PsiClass of its return
+     * type. Used for chained access like "$x.address" where we need to find the type of "address"
+     * on the class that $x is bound to.
+     */
+    private PsiClass resolveMemberType(
+        PsiClass ownerClass, String memberName, PsiElement context, Project project) {
+      // Try getter methods: getXxx() or isXxx()
+      String capitalizedName =
+          memberName.isEmpty()
+              ? memberName
+              : Character.toUpperCase(memberName.charAt(0)) + memberName.substring(1);
+      String getterName = "get" + capitalizedName;
+      String booleanGetterName = "is" + capitalizedName;
+
+      for (PsiMethod method : ownerClass.getAllMethods()) {
+        if (!method.hasModifierProperty(PsiModifier.PUBLIC)) continue;
+        if (method.hasModifierProperty(PsiModifier.STATIC)) continue;
+        if (method.getParameterList().getParametersCount() != 0) continue;
+
+        String methodName = method.getName();
+        if (methodName.equals(getterName) || methodName.equals(booleanGetterName)) {
+          PsiType returnType = method.getReturnType();
+          if (returnType != null) {
+            PsiClass resolved = resolveTypeToClass(returnType, context, project);
+            if (resolved != null) return resolved;
           }
         }
       }
 
-      // Try to resolve as a class name directly
-      return resolveClassName(text, context, project);
+      // Try direct method match (e.g. member name IS the method name)
+      for (PsiMethod method : ownerClass.getAllMethods()) {
+        if (!method.hasModifierProperty(PsiModifier.PUBLIC)) continue;
+        if (method.hasModifierProperty(PsiModifier.STATIC)) continue;
+        if (method.getParameterList().getParametersCount() != 0) continue;
+        if (method.getName().equals(memberName)) {
+          PsiType returnType = method.getReturnType();
+          if (returnType != null) {
+            PsiClass resolved = resolveTypeToClass(returnType, context, project);
+            if (resolved != null) return resolved;
+          }
+        }
+      }
+
+      // Try public fields
+      for (PsiField field : ownerClass.getAllFields()) {
+        if (!field.hasModifierProperty(PsiModifier.PUBLIC)) continue;
+        if (field.hasModifierProperty(PsiModifier.STATIC)) continue;
+        if (field.getName().equals(memberName)) {
+          PsiType fieldType = field.getType();
+          PsiClass resolved = resolveTypeToClass(fieldType, context, project);
+          if (resolved != null) return resolved;
+        }
+      }
+
+      return null;
+    }
+
+    /** Resolves a PsiType to its PsiClass. Handles class types by extracting the resolved class. */
+    private PsiClass resolveTypeToClass(PsiType type, PsiElement context, Project project) {
+      if (type instanceof com.intellij.psi.PsiClassType classType) {
+        return classType.resolve();
+      }
+      return null;
     }
 
     private PsiClass resolveClassName(String className, PsiElement context, Project project) {

@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.plugin.drool'
-version = '2.0.0'
+version = '2.1.0'
 
 repositories {
     mavenCentral()
@@ -25,6 +25,7 @@ java {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.vintage:junit-vintage-engine'
     testImplementation 'net.jqwik:jqwik:1.8.2'
 }
 
@@ -70,6 +71,16 @@ tasks {
         sinceBuild = '250'
         version = project.version
         changeNotes = """
+            <h3>2.1.0 - Language Support Fixes</h3>
+            <ul>
+                <li>Fixed dot completion on \$-prefixed binding variables in then-clauses and constraints</li>
+                <li>Fixed chained dot-access completion (e.g. \$customer.address.city)</li>
+                <li>Added unterminated string literal detection with error annotations</li>
+                <li>Fixed Ctrl+Click navigation on class names in fact patterns and globals</li>
+                <li>Fixed Ctrl+Click navigation on method names in \$-binding dot access</li>
+                <li>New shared DotAccessExpressionResolver utility for reliable \$-binding expression reconstruction</li>
+                <li>Tightened class reference registration to leaf-level IDENTIFIER elements</li>
+            </ul>
             <h3>2.0.0 - Full Language Support</h3>
             <ul>
                 <li>Grammar-Kit BNF parser with full AST and error recovery</li>
