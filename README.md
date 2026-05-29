@@ -1,8 +1,8 @@
 # Drools Rule Checker — IntelliJ IDEA Plugin for DRL Files
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/MohitPimoli/drool-rule-checker/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2024.2+-purple.svg)](https://www.jetbrains.com/idea/)
+[![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2025.0+-purple.svg)](https://www.jetbrains.com/idea/)
 [![Java](https://img.shields.io/badge/Java-17+-red.svg)](https://openjdk.org/)
 
 **Full language support for Drools Rule Language (.drl) files in IntelliJ IDEA** — grammar-based parsing, context-aware code completion, go-to-definition, real-time validation, quick fixes, and more.
@@ -49,9 +49,10 @@ Built on Grammar-Kit BNF and JFlex, the parser produces a full AST for all DRL c
 | Inside constraints | Bean properties of the fact type |
 
 ### Go-To-Definition (Ctrl+Click)
-- Click on a **class name** → navigate to Java source or decompiled class
-- Click on a **method call** → navigate to the method definition
+- Click on a **class name** in fact patterns, globals, or imports → navigate to Java source or decompiled class
+- Click on a **method/field** after `$variable.` → navigate to the method or field definition on the bound type
 - Click on a **binding variable** (`$customer`) → navigate to its declaration in the when-clause
+- Supports chained access: `$customer.address.city` resolves each segment
 
 ### Real-Time Validation
 | Check | Severity |
@@ -64,6 +65,7 @@ Built on Grammar-Kit BNF and JFlex, the parser produces a full AST for all DRL c
 | Invalid salience value (non-numeric) | Error |
 | Invalid date format in attributes | Error |
 | Unresolvable global type | Error |
+| Unterminated string literals | Error |
 | Duplicate rule names | Warning |
 | Unused binding variables | Warning |
 | Duplicate imports | Warning |
@@ -192,6 +194,8 @@ src/main/
 │   ├── DroolsStructureViewFactory.java  # Outline panel
 │   ├── DroolsFoldingBuilder.java        # Code folding
 │   ├── DroolsResolutionCache.java       # Class resolution cache
+│   ├── util/
+│   │   └── DotAccessExpressionResolver.java # $-binding expression reconstruction
 │   ├── psi/mixin/                       # Typed PSI mixins
 │   └── fixes/                           # Quick-fix actions
 └── resources/META-INF/
@@ -204,8 +208,8 @@ src/main/
 
 | IDE | Version |
 |-----|---------|
-| IntelliJ IDEA Community | 2024.2+ |
-| IntelliJ IDEA Ultimate | 2024.2+ |
+| IntelliJ IDEA Community | 2025.0+ |
+| IntelliJ IDEA Ultimate | 2025.0+ |
 
 Requires the Java plugin to be enabled (for classpath resolution and go-to-definition).
 
