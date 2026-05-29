@@ -7,6 +7,7 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.plugin.drool.fixes.AddImportFix;
 import com.plugin.drool.fixes.RemoveBindingFix;
@@ -33,6 +34,7 @@ import com.plugin.drool.psi.DroolsRuleBlock;
 import com.plugin.drool.psi.DroolsRuleName;
 import com.plugin.drool.psi.DroolsSalienceAttribute;
 import com.plugin.drool.psi.DroolsThenClause;
+import com.plugin.drool.psi.DroolsTypes;
 import com.plugin.drool.psi.DroolsTypeName;
 import com.plugin.drool.psi.DroolsWhenClause;
 import java.util.Collection;
@@ -73,6 +75,8 @@ public class DroolsAnnotator implements Annotator {
       validateJavaSyntax(thenClause, holder);
     } else if (element instanceof DroolsGlobalDecl global) {
       validateGlobalType(global, holder);
+    } else if (element instanceof DroolsPsiFile file) {
+      validateStrings(file, holder);
     }
   }
 
@@ -617,6 +621,75 @@ public class DroolsAnnotator implements Annotator {
     } catch (Exception e) {
       // Fail-open during indexing
     }
+  }
+
+  // ========== Unterminated String Validation ==========
+
+  /**
+   * Walks all STRING leaves in the file and flags any that are unterminated. A string is
+   * unterminated if it starts with {@code "} but does not end with an unescaped {@code "} (or has
+   * length < 2).
+   */
+  private void validateStrings(@NotNull DroolsPsiFile file, @NotNull AnnotationHolder holder) {
+    file.accept(
+        new PsiRecursiveElementWalkingVisitor() {
+          @Override
+          public void visitElement(@NotNull PsiElement element) {
+            if (element.getNode() != null
+                && element.getNode().getElementType() == DroolsTypes.STRING) {
+              String text = element.getText();
+              if (!isWellFormedStringLiteral(text)) {
+                holder
+                    .newAnnotation(HighlightSeverity.ERROR, "Unterminated string literal")
+                    .range(element)
+                    .create();
+              }
+            }
+            super.visitElement(element);
+          }
+        });
+  }
+
+  /**
+   * Returns {@code true} if the given text represents a well-formed string literal: starts with
+   * {@code "}, has length ≥ 2, and ends with an unescaped {@code "}.
+   *
+   * <p>Package-private for testing.
+   */
+  static boolean isWellFormedStringLiteral(@Nullable String text) {
+    if (text == null || text.length() < 2) {
+      return false;
+    }
+    if (!text.startsWith("\"")) {
+      return false;
+    }
+    return endsWithUnescapedQuote(text);
+  }
+
+  /**
+   * Returns {@code true} if the string ends with a {@code "} that is not escaped (i.e. the run of
+   * preceding backslashes has even length).
+   *
+   * <p>Package-private for testing.
+   */
+  static boolean endsWithUnescapedQuote(@Nullable String text) {
+    if (text == null || text.isEmpty()) {
+      return false;
+    }
+    if (text.charAt(text.length() - 1) != '"') {
+      return false;
+    }
+    // Count the run of backslashes immediately before the trailing quote
+    int backslashCount = 0;
+    for (int i = text.length() - 2; i >= 0; i--) {
+      if (text.charAt(i) == '\\') {
+        backslashCount++;
+      } else {
+        break;
+      }
+    }
+    // Even number of backslashes means the quote is NOT escaped
+    return backslashCount % 2 == 0;
   }
 
   // ========== Helper Methods ==========

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.plugin.drool</id>
     <name>Drools Rule Checker</name>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <vendor email="mohitpimoli31@gmail.com" url="https://github.com/MohitPimoli">Mohit Pimoli</vendor>
 
     <description><![CDATA[
@@ -113,6 +113,17 @@ end</code></pre>
     <depends>com.intellij.modules.java</depends>
 
     <change-notes><![CDATA[
+        <h3>Version 2.1.0 - Language Support Fixes</h3>
+        <ul>
+            <li><strong>🔧 Fixed Dot Completion on $-Bindings</strong> - Completion now works correctly after $-prefixed binding variables (e.g. <code>$alloyDbBackup.</code>) in then-clauses and constraint expressions</li>
+            <li><strong>🔧 Fixed Chained Dot-Access</strong> - Multi-level property access completion (e.g. <code>$customer.address.city</code>) now resolves each segment iteratively</li>
+            <li><strong>🆕 Unterminated String Detection</strong> - The annotator now flags unterminated string literals with a clear error annotation</li>
+            <li><strong>🔧 Fixed Class Name Navigation</strong> - Ctrl+Click on class names in fact patterns and global declarations now correctly navigates to the Java class</li>
+            <li><strong>🔧 Fixed Method Navigation on $-Bindings</strong> - Ctrl+Click on method names in $-binding dot access (e.g. <code>$alloyDbBackup.getResourceId()</code>) now navigates to the PsiMethod</li>
+            <li><strong>🏗️ DotAccessExpressionResolver</strong> - New shared utility that reconstructs $-prefixed expressions across DOLLAR/IDENTIFIER/DOT leaves, used by both completion and reference providers</li>
+            <li><strong>⚡ Tightened Reference Registration</strong> - Class references now register only on leaf-level IDENTIFIER elements for precise navigation</li>
+        </ul>
+
         <h3>Version 2.0.0 - Full Language Support (Major Rewrite)</h3>
         <ul>
             <li><strong>🧠 Grammar-Kit BNF Parser</strong> - Complete rewrite from regex-based to a proper recursive-descent parser with full AST and error recovery</li>
